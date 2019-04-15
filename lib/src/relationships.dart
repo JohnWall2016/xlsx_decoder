@@ -1,9 +1,14 @@
 import './document.dart';
 
 class Relationships extends Document {
+  @override
+  String get id => 'xl/_rels/workbook.xml.rels';
+  
   int _nextId = 1;
 
-  Relationships(XmlDocument document) : super(document ?? parse(emptyXml)) {
+  @override
+  void load(XmlDocument document) {
+    super.load(document ?? parse(emptyXml));
     elements.forEach((node) {
       var id = int.parse(node.getAttribute('Id').substring(3));
       if (id >= _nextId) _nextId = id + 1;

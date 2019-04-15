@@ -1,10 +1,10 @@
 import 'package:xml/xml.dart';
 export 'package:xml/xml.dart';
 
-class Document {
+abstract class Document {
   XmlDocument _document;
 
-  Document(this._document);
+  void load(XmlDocument document) => _document = document;
 
   Iterable<XmlElement> get elements =>
       _document.rootElement.children.whereType<XmlElement>();
@@ -12,4 +12,6 @@ class Document {
   XmlDocument get document => _document;
 
   void addNode(XmlNode node) => _document.rootElement.children.add(node);
+
+  String get id;
 }
