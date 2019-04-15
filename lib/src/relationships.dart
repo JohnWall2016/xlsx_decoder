@@ -23,7 +23,6 @@ class Relationships extends Document {
   }
 
   XmlNode findById(String id) => elements
-      .whereType<XmlElement>()
       .firstWhere((node) => node.getAttribute('Id') == id, orElse: () => null);
 
   XmlNode findByType(String type) => elements.firstWhere(
