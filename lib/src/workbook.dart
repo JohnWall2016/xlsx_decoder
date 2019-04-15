@@ -41,16 +41,16 @@ class Workbook extends Document {
 
   void _init(data) {
     _archive = ZipDecoder().decodeBytes(data);
-    _contentTypes = _parseDocument(ContentTypes());
-    _appProperties = _parseDocument(AppProperties());
-    _coreProperties = _parseDocument(CoreProperties());
-    _relationships = _parseDocument(Relationships());
-    _sharedStrings = _parseDocument(SharedStrings());
-    _styleSheet = _parseDocument(StyleSheet());
-    _parseDocument(this);
+    _contentTypes = _loadDocument(ContentTypes());
+    _appProperties = _loadDocument(AppProperties());
+    _coreProperties = _loadDocument(CoreProperties());
+    _relationships = _loadDocument(Relationships());
+    _sharedStrings = _loadDocument(SharedStrings());
+    _styleSheet = _loadDocument(StyleSheet());
+    _loadDocument(this);
   }
 
-  T _parseDocument<T extends Document>(T doc) {
+  T _loadDocument<T extends Document>(T doc) {
     var file = _archive.findFile(doc.id);
     if (file == null) 
       doc.load(null);
