@@ -31,7 +31,13 @@ class Workbook extends Document {
   Relationships _relationships;
   SharedStrings _sharedStrings;
   StyleSheet _styleSheet;
-  XmlDocument _document;
+
+  ContentTypes get contentTypes => _contentTypes;
+  AppProperties get appProperties => _appProperties;
+  CoreProperties get coreProperties => _coreProperties;
+  Relationships get relationships => _relationships;
+  SharedStrings get sharedStrings => _sharedStrings;
+  StyleSheet get styleSheet => _styleSheet;
 
   void _init(data) {
     _archive = ZipDecoder().decodeBytes(data);
@@ -41,7 +47,7 @@ class Workbook extends Document {
     _relationships = _parseDocument(Relationships());
     _sharedStrings = _parseDocument(SharedStrings());
     _styleSheet = _parseDocument(StyleSheet());
-    _document = _parseDocument(this);
+    _parseDocument(this);
   }
 
   T _parseDocument<T extends Document>(T doc) {
