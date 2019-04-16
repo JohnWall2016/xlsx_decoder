@@ -17,6 +17,8 @@ void main(List<String> args) {
   print(workbook.coreProperties.document);
   workbook.coreProperties['keywords'] = 'DART';
   print(workbook.coreProperties.document);
+
+  print(workbook.coreProperties.document.rootElement.children.toString());
 }
 
 void testRelationships() {
