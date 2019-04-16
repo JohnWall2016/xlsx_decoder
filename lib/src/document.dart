@@ -13,5 +13,8 @@ abstract class Document {
 
   void addNode(XmlNode node) => _document.rootElement.children.add(node);
 
+  void insertNode(int index, XmlNode node) =>
+      _document.rootElement.children.insert(index, node);
+
   String get id;
 }

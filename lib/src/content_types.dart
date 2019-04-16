@@ -7,8 +7,8 @@ class ContentTypes extends Document {
 
   XmlNode add(String partName, String contentType) {
     var node = (Element('Override')
-          ..addAttribute('PartName', partName)
-          ..addAttribute('ContentType', contentType))
+          ..attributes['PartName'] = partName
+          ..attributes['ContentType'] = contentType)
         .toXmlNode();
 
     addNode(node);

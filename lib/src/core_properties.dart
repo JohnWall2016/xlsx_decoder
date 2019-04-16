@@ -1,7 +1,6 @@
 import './document.dart';
 import './nodes.dart';
 
-
 class CoreProperties extends Document {
   @override
   String get id => 'docProps/core.xml';
@@ -35,7 +34,7 @@ class CoreProperties extends Document {
       }
     } else {
       _properties[key] = value;
-      super.addNode((Element(eName)..addChild(Text(value))).toXmlNode());
+      super.addNode((Element(eName)..children.add(Text(value))).toXmlNode());
     }
   }
 
@@ -48,7 +47,6 @@ class CoreProperties extends Document {
 
     return _properties[key];
   }
-
 }
 
 /*

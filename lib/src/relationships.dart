@@ -18,10 +18,10 @@ class Relationships extends Document {
 
   XmlNode add(String type, String target, [String targetMode]) {
     var element = Element('Relationship')
-      ..addAttribute('Id', 'rId${_nextId++}')
-      ..addAttribute('Type', '$relationshipSchemaPrefix$type')
-      ..addAttribute('Target', target);
-    if (targetMode != null) element.addAttribute('TargetMode', targetMode);
+      ..attributes['Id'] = 'rId${_nextId++}'
+      ..attributes['Type'] = '$relationshipSchemaPrefix$type'
+      ..attributes['Target'] = target;
+    if (targetMode != null) element.attributes['TargetMode'] = targetMode;
     var node = element.toXmlNode();
     addNode(node);
     return node;

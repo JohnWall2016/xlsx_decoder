@@ -13,29 +13,53 @@ class Text extends Node {
   XmlNode toXmlNode() => XmlText(_text);
 }
 
+class Attributes {
+  Map<String, String> _attributes;
+
+  operator []=(key, value) => _attributes[key] = value;
+
+  Attributes([this._attributes]) {
+    if (_attributes == null) _attributes = {};
+  }
+
+  List<XmlAttribute> toList() {
+    var list = <XmlAttribute>[];
+    _attributes.entries.forEach((entry) {
+      var attr = XmlAttribute(XmlName(entry.key), entry.value);
+      list.add(attr);
+    });
+    return list;
+  }
+
+  void removeEmptyAttributes() {
+    _attributes.removeWhere(
+        (k, v) => k == null || v == null || k.isEmpty || v.isEmpty);
+  }
+}
+
+class Nodes {
+  List<Node> _children;
+
+  Nodes([this._children]) {
+    if (_children == null) _children = [];
+  }
+
+  void add(Node node) => _children.add(node);
+
+  List<XmlNode> toList() => _children.map((e) => e.toXmlNode());
+}
+
 class Element extends Node {
   String _name;
-  Map<String, String> _attributes = {};
-  List<Node> _children = [];
+  Attributes _attributes = Attributes();
+  Nodes _children = Nodes();
 
   Element(this._name);
 
-  void addAttribute(String key, String value) => _attributes[key] = value;
+  Attributes get attributes => _attributes;
 
-  void addChild(Node child) => _children.add(child);
+  Nodes get children => _children;
 
-  XmlElement toXmlNode() {
-    var node = XmlElement(XmlName(_name));
-
-    _attributes.entries.forEach((entry) {
-      var attr = XmlAttribute(XmlName(entry.key), entry.value);
-      node.attributes.add(attr);
-    });
-
-    _children.forEach((e) {
-      node.children.add(e.toXmlNode());
-    });
-
-    return node;
-  }
+  XmlElement toXmlNode() =>
+      XmlElement(XmlName(_name), _attributes.toList(), _children.toList());
 }

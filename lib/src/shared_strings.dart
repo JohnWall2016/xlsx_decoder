@@ -13,8 +13,7 @@ class SharedStrings extends Document {
   void load(XmlDocument document) {
     super.load(document ?? parse(emptyXml));
     document.rootElement.attributes.removeWhere((attr) {
-      return attr.name.local == 'count' ||
-          attr.name.local == 'uniqueCount';
+      return attr.name.local == 'count' || attr.name.local == 'uniqueCount';
     });
 
     _cacheExistingSharedStrings();
@@ -32,9 +31,9 @@ class SharedStrings extends Document {
     var element = Element('si');
     if (string is String) {
       var node = (element
-            ..addChild(Element('t')
-              ..addAttribute('xml:space', 'preserve')
-              ..addChild(Text(string))))
+            ..children.add(Element('t')
+              ..attributes['xml:space'] = 'preserve'
+              ..children.add(Text(string))))
           .toXmlNode();
       addNode(node);
     } else {
@@ -50,7 +49,7 @@ class SharedStrings extends Document {
     var i = 0;
     elements.forEach((node) {
       var content = node.children[0];
-      if (content is XmlElement) {  
+      if (content is XmlElement) {
         if (content.name.local == 't') {
           var string = content.children[0].text;
           _nodeArray.add(string);
