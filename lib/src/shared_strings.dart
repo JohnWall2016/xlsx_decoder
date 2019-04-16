@@ -5,7 +5,7 @@ class SharedStrings extends Document {
   @override
   String get id => 'xl/sharedStrings.xml';
 
-  List<dynamic> _stringArray = [];
+  List<dynamic> _nodeArray = [];
 
   Map<dynamic, int> _indexMap = {};
 
@@ -13,8 +13,8 @@ class SharedStrings extends Document {
   void load(XmlDocument document) {
     super.load(document ?? parse(emptyXml));
     document.rootElement.attributes.removeWhere((attr) {
-      return attr.name == XmlName('count') ||
-          attr.name == XmlName('uniqueCount');
+      return attr.name.local == 'count' ||
+          attr.name.local == 'uniqueCount';
     });
 
     _cacheExistingSharedStrings();
@@ -25,8 +25,8 @@ class SharedStrings extends Document {
     var index = _indexMap[key];
     if (index != null) return index;
 
-    index = _stringArray.length;
-    _stringArray.add(string);
+    index = _nodeArray.length;
+    _nodeArray.add(string);
     _indexMap[key] = index;
 
     var element = Element('si');
@@ -44,34 +44,34 @@ class SharedStrings extends Document {
     return index;
   }
 
-  String getStringByIndex(int index) => _stringArray[index] as String;
+  String getStringByIndex(int index) => _nodeArray[index].toString();
 
   void _cacheExistingSharedStrings() {
     var i = 0;
     elements.forEach((node) {
       var content = node.children[0];
-      if (content is XmlElement) {
-        if (content.name == XmlName('t')) {
+      if (content is XmlElement) {  
+        if (content.name.local == 't') {
           var string = content.children[0].text;
-          _stringArray.add(string);
+          _nodeArray.add(string);
           _indexMap[string] = i++;
         } else {
           // TODO(wj): A dirty hack
           var string = '';
           node.children.forEach((cnode) {
-            if (cnode is XmlElement && cnode.name == XmlName('r')) {
+            if (cnode is XmlElement && cnode.name.local == 'r') {
               cnode.children.forEach((ccnode) {
-                if (ccnode is XmlElement && ccnode.name == XmlName("t"))
+                if (ccnode is XmlElement && ccnode.name.local == 't')
                   string += ccnode.text;
               });
             }
           });
           if (string.isNotEmpty) {
-            _stringArray.add(string);
+            _nodeArray.add(string);
             _indexMap[string] = i++;
           } else {
             // TODO: Properly support rich text nodes in the future. For now just store the object as a placeholder.
-            _stringArray.add(node.children);
+            _nodeArray.add(node.children);
             _indexMap[node.children.toString()] = i++;
           }
         }

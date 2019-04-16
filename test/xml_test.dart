@@ -12,13 +12,18 @@ void main(List<String> args) {
   print(workbook.sharedStrings.document);
   print(workbook.styleSheet.document);
   print(workbook.document);*/
+  /*
+  print(workbook.coreProperties.document.rootElement.children.toString());*/
+
+  testSharedString(workbook);
+}
+
+void testCoreProperties(Workbook workbook) {
   print(workbook.coreProperties.document);
   workbook.coreProperties['keywords'] = 'XLSX';
   print(workbook.coreProperties.document);
   workbook.coreProperties['keywords'] = 'DART';
   print(workbook.coreProperties.document);
-
-  print(workbook.coreProperties.document.rootElement.children.toString());
 }
 
 void testRelationships() {
@@ -28,4 +33,11 @@ void testRelationships() {
   print(rels.document);
   print(rels.findById('rId1'));
   print(rels.findByType('theme'));
+}
+
+void testSharedString(Workbook workbook) {
+  //print(workbook.sharedStrings.document);
+  //print(workbook.sharedStrings.getStringByIndex(0));
+  workbook.sharedStrings.getIndexForString('刘德华');
+  print(workbook.sharedStrings.document.toXmlString(pretty: false));
 }
