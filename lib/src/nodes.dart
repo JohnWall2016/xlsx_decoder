@@ -22,14 +22,9 @@ class Attributes {
     if (_attributes == null) _attributes = {};
   }
 
-  List<XmlAttribute> toList() {
-    var list = <XmlAttribute>[];
-    _attributes.entries.forEach((entry) {
-      var attr = XmlAttribute(XmlName(entry.key), entry.value);
-      list.add(attr);
-    });
-    return list;
-  }
+  List<XmlAttribute> toList() => _attributes.entries
+      .map((entry) => XmlAttribute(XmlName(entry.key), entry.value))
+      .toList();
 
   void removeEmptyAttributes() {
     _attributes.removeWhere(
