@@ -8,14 +8,9 @@ XmlElement findChild(XmlElement node, String name) {
       .firstWhere((node) => node.name.local == name, orElse: () => null);
 }
 
-void setChildAttributes(XmlElement node, String name, Attributes attributes) {
-  var child = findChild(node, name);
-  if (child == null) {
-    child = Element(name).toXmlNode();
-    node.children.add(child);
-  }
+void setAttributes(XmlElement node, Attributes attributes) {
   List<XmlAttribute> xmlAttrs = [];
-  child.attributes.forEach((xmlAttr) {
+  node.attributes.forEach((xmlAttr) {
     if (!attributes.containKey(xmlAttr.name.local)) {
       xmlAttrs.add(xmlAttr);
     } else {
@@ -26,14 +21,47 @@ void setChildAttributes(XmlElement node, String name, Attributes attributes) {
       }
     }
   });
-  child.attributes.clear();
-  child.attributes.addAll(xmlAttrs);
+  node.attributes.clear();
+  node.attributes.addAll(xmlAttrs);
+}
+
+void setChildAttributes(XmlElement node, String name, Attributes attributes) {
+  var child = appendChildIfNotFound(node, name);
+  setAttributes(child, attributes);
+}
+
+String getAttribute(XmlElement node, String attribute) {
+  var attr = node.attributes.firstWhere(
+      (xmlAttr) => xmlAttr.name.local == attribute,
+      orElse: () => null);
+  if (attr != null) return attr.value;
+  return null;
+}
+
+String getChildAttribute(XmlElement node, String name, String attribute) {
+  var child = findChild(node, name);
+  if (child != null) return getAttribute(child, attribute);
+  return null;
 }
 
 void removeChildIfEmpty(XmlElement node, String name) {
-  var child = findChild(node, name);
-  if (child != null && isEmpty(child)) node.children.remove(child);
+  node.children.removeWhere(
+      (node) => node is XmlElement && node.name.local == name && isEmpty(node));
 }
 
 bool isEmpty(XmlElement node) =>
     node.children.isEmpty && node.attributes.isEmpty;
+
+XmlElement appendChildIfNotFound(XmlElement node, String name) {
+  var child = findChild(node, name);
+  if (child == null) {
+    child = Element(name).toXmlNode();
+    node.children.add(child);
+  }
+  return child;
+}
+
+void removeChild(XmlElement node, String name) {
+  node.children
+      .removeWhere((node) => node is XmlElement && node.name.local == name);
+}

@@ -120,16 +120,73 @@ class Style {
   }
 
   void _setColor(XmlElement node, String name, dynamic color) {
-    if (color is String) color = Color()..rgb = color;
+    if (color is String)
+      color = Color()..rgb = color;
     else if (color is int) color = Color()..theme = color;
 
-    setChildAttributes(node, name, Attributes({
-      'rgb': color.rgb?.toUpperCase(),
-      'indexed': null,
-      'theme': color.theme?.toString(),
-      'tint': color.tint
-    }));
+    setChildAttributes(
+        node,
+        name,
+        Attributes({
+          'rgb': color.rgb?.toUpperCase(),
+          'indexed': null,
+          'theme': color.theme?.toString(),
+          'tint': color.tint
+        }));
 
     removeChildIfEmpty(node, 'color');
   }
+
+  bool get bold => findChild(_fontNode, 'b') != null;
+
+  void set bold(bool value) {
+    if (value)
+      appendChildIfNotFound(_fontNode, 'b');
+    else
+      removeChild(_fontNode, 'b');
+  }
+
+  get underline {
+    var node = findChild(_fontNode, 'u');
+    return node == null ? false : getAttribute(node, 'val') ?? true;
+  }
+
+  set underline(value) {
+    if (value is bool) {
+      if (value)
+        appendChildIfNotFound(_fontNode, 'u');
+      else
+        removeChild(_fontNode, 'u');
+    } else if (value is String) {
+      var node = appendChildIfNotFound(_fontNode, 'u');
+      setAttributes(node, Attributes({'val': value}));
+    }
+  }
+
+  bool get strikethrough => findChild(_fontNode, 'strike') != null;
+
+  void set strikethrough(bool value) {
+    if (value)
+      appendChildIfNotFound(_fontNode, 'strike');
+    else
+      removeChild(_fontNode, 'strike');
+  }
+
+  String _getFontVerticalAlignment() =>
+      getChildAttribute(this._fontNode, 'vertAlign', "val");
+
+  void _setFontVerticalAlignment(String alignment) {
+    setChildAttributes(_fontNode, 'vertAlign', Attributes({'val': alignment}));
+    removeChildIfEmpty(_fontNode, 'vertAlign');
+  }
+
+  bool get subscript => _getFontVerticalAlignment() == "subscript";
+
+  void set subscript(bool value) =>
+      _setFontVerticalAlignment(value ? "subscript" : null);
+
+  bool get superscript => _getFontVerticalAlignment() == "superscript";
+
+  void set superscript(bool value) =>
+      _setFontVerticalAlignment(value ? "superscript" : null);
 }
