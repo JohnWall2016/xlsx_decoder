@@ -38,7 +38,7 @@ class SharedStrings extends Document {
           .toXmlNode();
       addNode(node);
     } else {
-      var node = element.toXmlNode()..children.add(string);
+      var node = element.toXmlNode()..children.addAll(string);
       addNode(node);
     }
     return index;
