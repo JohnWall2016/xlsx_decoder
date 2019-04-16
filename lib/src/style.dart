@@ -1,6 +1,8 @@
-import './style_sheet.dart';
 import 'package:xml/xml.dart';
+
+import './style_sheet.dart';
 import './nodes.dart';
+import './xml_utils.dart';
 
 class Color {
   String rgb;
@@ -92,29 +94,8 @@ class Style {
 
   int get id => _id;
 
-  XmlElement _findChild(XmlElement node, name) {
-    return node.children
-        .whereType<XmlElement>()
-        .firstWhere((node) => node.name.local == name, orElse: () => null);
-  }
-
-  void _setChildAttributes(XmlElement node, String name, Attributes attributes) {
-    var child = _findChild(node, name);
-    if (child != null) {
-      child.attributes.clear();
-      attributes.removeEmptyAttributes();
-      child.attributes.addAll(attributes.toList());
-    }
-  }
-
-  void _removeChildIfEmpty(XmlElement node, name) {
-    var child = _findChild(node, name);
-    if (child != null && child.children.isEmpty && child.attributes.isEmpty)
-      node.children.remove(child);
-  }
-
   Color _getColor(XmlElement node, String name) {
-    var child = _findChild(node, name);
+    var child = findChild(node, name);
     if (child == null || child.attributes.isEmpty) return null;
 
     var color = Color();
@@ -139,17 +120,16 @@ class Style {
   }
 
   void _setColor(XmlElement node, String name, dynamic color) {
-    var clr = Color();
-    if (color is String) clr.rgb = color;
-    else if (color is int) clr.theme = color;
+    if (color is String) color = Color()..rgb = color;
+    else if (color is int) color = Color()..theme = color;
 
-    _setChildAttributes(node, name, Attributes({
-      'rgb': clr.rgb?.toUpperCase(),
+    setChildAttributes(node, name, Attributes({
+      'rgb': color.rgb?.toUpperCase(),
       'indexed': null,
-      'theme': clr.theme?.toString(),
-      'tint': clr.tint
+      'theme': color.theme?.toString(),
+      'tint': color.tint
     }));
 
-    _removeChildIfEmpty(node, 'color');
+    removeChildIfEmpty(node, 'color');
   }
 }

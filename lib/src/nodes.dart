@@ -16,45 +16,45 @@ class Text extends Node {
 class Attributes {
   Map<String, String> _attributes;
 
-  operator []=(key, value) => _attributes[key] = value;
+  void operator []=(String key, String value) => _attributes[key] = value;
+
+  String operator [](String key) => _attributes[key];
 
   Attributes([this._attributes]) {
     if (_attributes == null) _attributes = {};
   }
 
-  List<XmlAttribute> toList() => _attributes.entries
-      .map((entry) => XmlAttribute(XmlName(entry.key), entry.value))
-      .toList();
+  Iterable<XmlAttribute> toXml() => _attributes.entries
+      .map((entry) => XmlAttribute(XmlName(entry.key), entry.value));
 
-  void removeEmptyAttributes() {
-    _attributes.removeWhere(
-        (k, v) => k == null || v == null || k.isEmpty || v.isEmpty);
-  }
+  Iterable<String> get keys => _attributes.keys;
+
+  bool containKey(String key) => _attributes.containsKey(key);
 }
 
-class Nodes {
+class NodeList {
   List<Node> _children;
 
-  Nodes([this._children]) {
+  NodeList([this._children]) {
     if (_children == null) _children = [];
   }
 
   void add(Node node) => _children.add(node);
 
-  List<XmlNode> toList() => _children.map((e) => e.toXmlNode()).toList();
+  Iterable<XmlNode> toXml() => _children.map((e) => e.toXmlNode());
 }
 
 class Element extends Node {
   String _name;
   Attributes _attributes = Attributes();
-  Nodes _children = Nodes();
+  NodeList _children = NodeList();
 
   Element(this._name);
 
   Attributes get attributes => _attributes;
 
-  Nodes get children => _children;
+  NodeList get children => _children;
 
   XmlElement toXmlNode() =>
-      XmlElement(XmlName(_name), _attributes.toList(), _children.toList());
+      XmlElement(XmlName(_name), _attributes.toXml(), _children.toXml());
 }
