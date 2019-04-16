@@ -1,9 +1,10 @@
 import './document.dart';
+import './nodes.dart';
 
 class Relationships extends Document {
   @override
   String get id => 'xl/_rels/workbook.xml.rels';
-  
+
   int _nextId = 1;
 
   @override
@@ -16,13 +17,12 @@ class Relationships extends Document {
   }
 
   XmlNode add(String type, String target, [String targetMode]) {
-    var node = XmlElement(XmlName('Relationship'), [
-      XmlAttribute(XmlName('Id'), 'rId${_nextId++}'),
-      XmlAttribute(XmlName('Type'), '$relationshipSchemaPrefix$type'),
-      XmlAttribute(XmlName('Target'), target)
-    ]);
-    if (targetMode != null)
-      node.attributes.add(XmlAttribute(XmlName('TargetMode'), targetMode));
+    var element = Element('Relationship')
+      ..addAttribute('Id', 'rId${_nextId++}')
+      ..addAttribute('Type', '$relationshipSchemaPrefix$type')
+      ..addAttribute('Target', target);
+    if (targetMode != null) element.addAttribute('TargetMode', targetMode);
+    var node = element.toXmlNode();
     addNode(node);
     return node;
   }

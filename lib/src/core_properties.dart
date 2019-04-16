@@ -1,8 +1,54 @@
 import './document.dart';
+import './nodes.dart';
+
 
 class CoreProperties extends Document {
   @override
   String get id => 'docProps/core.xml';
+
+  static const allowedProperties = {
+    "title": "dc:title",
+    "subject": "dc:subject",
+    "author": "dc:creator",
+    "creator": "dc:creator",
+    "description": "dc:description",
+    "keywords": "cp:keywords",
+    "category": "cp:category"
+  };
+
+  Map<String, String> _properties = {};
+
+  void operator []=(String name, String value) {
+    var key = name.toLowerCase();
+
+    if (!allowedProperties.containsKey(key)) {
+      throw 'Unknown property name: "$name"';
+    }
+
+    var eName = allowedProperties[key];
+    if (_properties.containsKey(key)) {
+      var element = super.elements.firstWhere((e) => e.name == XmlName(eName));
+      if (element != null) {
+        element.children
+          ..clear()
+          ..add(XmlText(value));
+      }
+    } else {
+      _properties[key] = value;
+      super.addNode((Element(eName)..addChild(Text(value))).toXmlNode());
+    }
+  }
+
+  String operator [](String name) {
+    var key = name.toLowerCase();
+
+    if (!allowedProperties.containsKey(key)) {
+      throw 'Unknown property name: "$name"';
+    }
+
+    return _properties[key];
+  }
+
 }
 
 /*
