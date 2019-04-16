@@ -9,7 +9,7 @@ class Color {
   int theme;
   String tint;
 
-  bool get isEmpty => rgb == null || theme == null || tint == null;
+  bool get isEmpty => rgb == null && theme == null && tint == null;
 
   static const colors = [
     "000000",
