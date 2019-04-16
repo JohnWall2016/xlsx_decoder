@@ -46,7 +46,7 @@ class Nodes {
 
   void add(Node node) => _children.add(node);
 
-  List<XmlNode> toList() => _children.map((e) => e.toXmlNode());
+  List<XmlNode> toList() => _children.map((e) => e.toXmlNode()).toList();
 }
 
 class Element extends Node {
