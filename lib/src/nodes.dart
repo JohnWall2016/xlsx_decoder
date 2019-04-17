@@ -41,6 +41,8 @@ class NodeList {
 
   void add(Node node) => _children.add(node);
 
+  void addAll(Iterable<Node> nodes) => _children.addAll(nodes);
+
   Iterable<XmlNode> toXml() => _children.map((e) => e.toXmlNode());
 }
 
@@ -49,7 +51,10 @@ class Element extends Node {
   Attributes _attributes = Attributes();
   NodeList _children = NodeList();
 
-  Element(this._name, [this._attributes]);
+  Element(String name, [Map<String, String> attributes]) {
+    _name = name;
+    _attributes = Attributes(attributes);
+  }
 
   Attributes get attributes => _attributes;
 

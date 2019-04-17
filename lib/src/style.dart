@@ -125,7 +125,8 @@ class Style {
   XmlElement _fillNode;
   XmlElement _borderNode;
 
-  Style(_styleSheet, _id, _xfNode, _fontNode, _fillNode, _borderNode) {}
+  Style(this._styleSheet, this._id, this._xfNode, this._fontNode,
+      this._fillNode, this._borderNode) {}
 
   int get id => _id;
 
@@ -402,15 +403,13 @@ class Style {
 
     if (fill is SolidFill) {
       var patternFill =
-          Element('patternFill', Attributes({'patternType': 'solid'}))
-              .toXmlNode();
+          Element('patternFill', {'patternType': 'solid'}).toXmlNode();
       _setColor(patternFill, 'fgColor', fill.color);
       _fillNode.children.add(patternFill);
       return;
     } else if (fill is PatternFill) {
       var patternFill =
-          Element('patternFill', Attributes({'patternType': fill.type}))
-              .toXmlNode();
+          Element('patternFill', {'patternType': fill.type}).toXmlNode();
       _setColor(patternFill, 'fgColor', fill.foreground);
       _setColor(patternFill, 'bgColor', fill.background);
       _fillNode.children.add(patternFill);
@@ -426,8 +425,7 @@ class Style {
         'degree': fill.angle
       });
       fill.stops.forEach((stop) {
-        var node = Element('stop', Attributes({'position': stop.position}))
-            .toXmlNode();
+        var node = Element('stop', {'position': stop.position}).toXmlNode();
         _setColor(node, 'color', stop.color);
         gradientFill.children.add(node);
       });

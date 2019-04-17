@@ -1,6 +1,7 @@
 import './document.dart';
 import './nodes.dart';
 import './style.dart';
+import './xml_utils.dart';
 
 class StyleSheet extends Document {
   @override
@@ -127,7 +128,61 @@ class StyleSheet extends Document {
   }
 
   Style createStyle(int sourceId) {
-    
+    XmlElement fontNode, fillNode, borderNode, xfNode;
+
+    if (sourceId >= 0) {
+      var sourceXfNode = _cellXfsNode.children[sourceId] as XmlElement;
+      xfNode = sourceXfNode.copy();
+
+      if (getAttribute(sourceXfNode, 'applyFont') != null) {
+        var fontId = int.parse(getAttribute(sourceXfNode, 'fontId'));
+        fontNode = _fontsNode.children[fontId].copy();
+      }
+
+      if (getAttribute(sourceXfNode, 'applyFill') != null) {
+        var fillId = int.parse(getAttribute(sourceXfNode, 'fillId'));
+        fillNode = _fillsNode.children[fillId].copy();
+      }
+
+      if (getAttribute(sourceXfNode, 'applyBorder') != null) {
+        var borderId = int.parse(getAttribute(sourceXfNode, 'borderId'));
+        borderNode = _bordersNode.children[borderId].copy();
+      }
+    }
+
+    if (fontNode == null) fontNode = Element('font').toXmlNode();
+    _fontsNode.children.add(fontNode);
+
+    if (fillNode == null) fillNode = Element('fill').toXmlNode();
+    _fillsNode.children.add(fillNode);
+
+    // The border sides must be in order
+    if (borderNode == null) {
+      borderNode = (Element('border')
+            ..children.addAll([
+              Element('left'),
+              Element('right'),
+              Element('top'),
+              Element('bottom'),
+              Element('diagonal'),
+            ]))
+          .toXmlNode();
+    }
+    _bordersNode.children.add(borderNode);
+
+    if (xfNode == null) xfNode = Element('xf').toXmlNode();
+    setAttributes(xfNode, {
+      'fontId': '${_fontsNode.children.length - 1}',
+      'fillId': '${_fillsNode.children.length - 1}',
+      'borderId': '${_bordersNode.children.length - 1}',
+      'applyFont': '1',
+      'applyFill': '1',
+      'applyBorder': '1'
+    });
+    _cellXfsNode.children.add(xfNode);
+
+    return Style(this, _cellXfsNode.children.length - 1, xfNode, fontNode,
+        fillNode, borderNode);
   }
 }
 
