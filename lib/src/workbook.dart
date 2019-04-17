@@ -46,6 +46,9 @@ class Workbook extends Document {
   StyleSheet get styleSheet => _styleSheet;
 
   void _init(data) {
+    _maxSheetId = 0;
+    _sheets = [];
+
     _archive = ZipDecoder().decodeBytes(data);
     _contentTypes = _loadDocument(ContentTypes());
     _appProperties = _loadDocument(AppProperties());
@@ -64,7 +67,7 @@ class Workbook extends Document {
           "application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml");
     }
 
-    _sheetsNode = findChild(document, "sheets");
+    _sheetsNode = findChild(document.rootElement, "sheets");
     for (var i = 0; i < _sheetsNode.children.length; i++) {
       var sheetIdNode = _sheetsNode.children[i] as XmlElement;
       var sheetId = int.parse(getAttribute(sheetIdNode, 'sheetId'));
@@ -74,7 +77,7 @@ class Workbook extends Document {
       var sheetRelationshipsNode =
           parseDocument('xl/worksheets/_rels/sheet${i + 1}.xml.rels');
 
-      _sheets[i] = Sheet(this, sheetIdNode, sheetNode, sheetRelationshipsNode);
+      _sheets.add(Sheet(this, sheetIdNode, sheetNode, sheetRelationshipsNode));
     }
   }
 
