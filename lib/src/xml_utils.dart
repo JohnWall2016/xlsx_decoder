@@ -8,10 +8,10 @@ XmlElement findChild(XmlElement node, String name) {
       .firstWhere((node) => node.name.local == name, orElse: () => null);
 }
 
-void setAttributes(XmlElement node, Attributes attributes) {
+void setAttributes(XmlElement node, Map<String, String> attributes) {
   List<XmlAttribute> xmlAttrs = [];
   node.attributes.forEach((xmlAttr) {
-    if (!attributes.containKey(xmlAttr.name.local)) {
+    if (!attributes.containsKey(xmlAttr.name.local)) {
       xmlAttrs.add(xmlAttr);
     } else {
       var value = attributes[xmlAttr.name.local];
@@ -25,13 +25,13 @@ void setAttributes(XmlElement node, Attributes attributes) {
   node.attributes.addAll(xmlAttrs);
 }
 
-void setChildAttributes(XmlElement node, String name, Attributes attributes) {
+void setChildAttributes(XmlElement node, String name, Map<String, String> attributes) {
   var child = appendChildIfNotFound(node, name);
   setAttributes(child, attributes);
 }
 
 String getAttribute(XmlElement node, String attribute) {
-  var attr = node.attributes.firstWhere(
+  var attr = node?.attributes?.firstWhere(
       (xmlAttr) => xmlAttr.name.local == attribute,
       orElse: () => null);
   if (attr != null) return attr.value;

@@ -29,7 +29,7 @@ class Attributes {
 
   Iterable<String> get keys => _attributes.keys;
 
-  bool containKey(String key) => _attributes.containsKey(key);
+  bool containsKey(String key) => _attributes.containsKey(key);
 }
 
 class NodeList {

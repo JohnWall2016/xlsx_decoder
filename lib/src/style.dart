@@ -81,6 +81,30 @@ class Color {
   ];
 }
 
+class Stop {
+  String position;
+  Color color;
+}
+
+abstract class Fill {}
+
+class SolidFill extends Fill {
+  Color color;
+}
+
+class PatternFill extends Fill {
+  String type;
+  Color foreground;
+  Color background;
+}
+
+class GradientFill extends Fill {
+  String type;
+  List<Stop> stops;
+  String angle;
+  String left, right, top, bottom;
+}
+
 class Style {
   StyleSheet _styleSheet;
   int _id;
@@ -89,8 +113,7 @@ class Style {
   XmlElement _fillNode;
   XmlElement _borderNode;
 
-  Style(this._styleSheet, this._id, this._xfNode, this._fontNode,
-      this._fillNode, this._borderNode) {}
+  Style(_styleSheet, _id, _xfNode, _fontNode, _fillNode, _borderNode) {}
 
   int get id => _id;
 
@@ -124,15 +147,12 @@ class Style {
       color = Color()..rgb = color;
     else if (color is int) color = Color()..theme = color;
 
-    setChildAttributes(
-        node,
-        name,
-        Attributes({
-          'rgb': color.rgb?.toUpperCase(),
-          'indexed': null,
-          'theme': color.theme?.toString(),
-          'tint': color.tint
-        }));
+    setChildAttributes(node, name, {
+      'rgb': color.rgb?.toUpperCase(),
+      'indexed': null,
+      'theme': color.theme?.toString(),
+      'tint': color.tint
+    });
 
     removeChildIfEmpty(node, 'color');
   }
@@ -159,7 +179,7 @@ class Style {
         removeChild(_fontNode, 'u');
     } else if (value is String) {
       var node = appendChildIfNotFound(_fontNode, 'u');
-      setAttributes(node, Attributes({'val': value}));
+      setAttributes(node, {'val': value});
     }
   }
 
@@ -173,10 +193,10 @@ class Style {
   }
 
   String _getFontVerticalAlignment() =>
-      getChildAttribute(this._fontNode, 'vertAlign', "val");
+      getChildAttribute(_fontNode, 'vertAlign', "val");
 
   void _setFontVerticalAlignment(String alignment) {
-    setChildAttributes(_fontNode, 'vertAlign', Attributes({'val': alignment}));
+    setChildAttributes(_fontNode, 'vertAlign', {'val': alignment});
     removeChildIfEmpty(_fontNode, 'vertAlign');
   }
 
@@ -189,4 +209,175 @@ class Style {
 
   void set superscript(bool value) =>
       _setFontVerticalAlignment(value ? "superscript" : null);
+
+  int get fontSize => int.parse(getChildAttribute(_fontNode, 'sz', "val"));
+
+  void set fontSize(int size) {
+    setChildAttributes(_fontNode, 'sz', {'val': '$size'});
+    removeChildIfEmpty(_fontNode, 'sz');
+  }
+
+  String get fontFamily => getChildAttribute(_fontNode, 'name', "val");
+
+  void set fontFamily(String family) {
+    setChildAttributes(_fontNode, 'name', {'val': family});
+    removeChildIfEmpty(_fontNode, 'name');
+  }
+
+  Color get fontColor => _getColor(_fontNode, "color");
+
+  void set fontColor(color) => _setColor(_fontNode, "color", color);
+
+  String get horizontalAlignment =>
+      getChildAttribute(_xfNode, 'alignment', 'horizontal');
+
+  void set horizontalAlignment(String alignment) {
+    setChildAttributes(_xfNode, 'alignment', {'horizontal': alignment});
+    removeChildIfEmpty(_xfNode, 'alignment');
+  }
+
+  bool get justifyLastLine =>
+      getChildAttribute(_xfNode, 'alignment', 'justifyLastLine') == '1';
+
+  void set justifyLastLine(bool value) {
+    setChildAttributes(
+        _xfNode, 'alignment', {'justifyLastLine': value ? '1' : null});
+    removeChildIfEmpty(_xfNode, 'alignment');
+  }
+
+  String get indent => getChildAttribute(_xfNode, 'alignment', 'indent');
+
+  void set indent(String value) {
+    setChildAttributes(_xfNode, 'alignment', {'indent': value});
+    removeChildIfEmpty(_xfNode, 'alignment');
+  }
+
+  String get verticalAlignment =>
+      getChildAttribute(_xfNode, 'alignment', 'vertical');
+
+  void set verticalAlignment(String value) {
+    setChildAttributes(_xfNode, 'alignment', {'vertical': value});
+    removeChildIfEmpty(_xfNode, 'alignment');
+  }
+
+  bool get wrapText =>
+      getChildAttribute(_xfNode, 'alignment', 'wrapText') == '1';
+
+  void set wrapText(bool value) {
+    setChildAttributes(_xfNode, 'alignment', {'wrapText': value ? '1' : null});
+    removeChildIfEmpty(_xfNode, 'alignment');
+  }
+
+  bool get shrinkToFit =>
+      getChildAttribute(_xfNode, 'alignment', 'shrinkToFit') == '1';
+
+  void set shrinkToFit(bool value) {
+    setChildAttributes(
+        _xfNode, 'alignment', {'shrinkToFit': value ? '1' : null});
+    removeChildIfEmpty(_xfNode, 'alignment');
+  }
+
+  String get textDirection {
+    var readingOrder = getChildAttribute(_xfNode, 'alignment', 'readingOrder');
+    if (readingOrder == '1') return 'left-to-right';
+    if (readingOrder == '2') return 'right-to-left';
+    return readingOrder;
+  }
+
+  void set textDirection(String value) {
+    String readingOrder;
+    if (value == "left-to-right")
+      readingOrder = '1';
+    else if (textDirection == "right-to-left") readingOrder = '2';
+    setChildAttributes(_xfNode, 'alignment', {'readingOrder': readingOrder});
+    removeChildIfEmpty(_xfNode, 'alignment');
+  }
+
+  double _getTextRotation() =>
+      double.parse(getChildAttribute(_xfNode, 'alignment', "textRotation"));
+
+  void _setTextRotation(double textRotation) {
+    setChildAttributes(_xfNode, 'alignment', {'textRotation': '$textRotation'});
+    removeChildIfEmpty(_xfNode, 'alignment');
+  }
+
+  double get textRotation {
+    var textRotation = _getTextRotation();
+
+    // Negative angles in Excel correspond to values > 90 in OOXML.
+    if (textRotation > 90) textRotation = 90 - textRotation;
+    return textRotation;
+  }
+
+  void set textRotation(double textRotation) {
+    // Negative angles in Excel correspond to values > 90 in OOXML.
+    if (textRotation < 0) textRotation = 90 - textRotation;
+    _setTextRotation(textRotation);
+  }
+
+  bool get angleTextCounterclockwise => _getTextRotation() == 45;
+
+  void set angleTextCounterclockwise(bool value) {
+    _setTextRotation(value ? 45 : null);
+  }
+
+  bool get angleTextClockwise => _getTextRotation() == 135;
+
+  void set angleTextClockwise(bool value) =>
+      _setTextRotation(value ? 135 : null);
+
+  bool get rotateTextUp => _getTextRotation() == 90;
+
+  void set rotateTextUp(bool value) => _setTextRotation(value ? 90 : null);
+
+  bool get rotateTextDown => _getTextRotation() == 180;
+
+  void set rotateTextDown(bool value) => _setTextRotation(value ? 180 : null);
+
+  bool get verticalText => _getTextRotation() == 255;
+
+  void set verticalText(bool value) => _setTextRotation(value ? 255 : null);
+
+  Fill get fill {
+    var patternFillNode = findChild(_fillNode, 'patternFill');
+    var gradientFillNode = findChild(this._fillNode, 'gradientFill');
+    var patternType = getAttribute(patternFillNode, 'patternType');
+
+    if (patternType == "solid") {
+      return SolidFill()..color = _getColor(patternFillNode, 'fgColor');
+    }
+
+    if (patternType != null) {
+      return PatternFill()
+        ..type = patternType
+        ..foreground = _getColor(patternFillNode, 'fgColor')
+        ..background = _getColor(patternFillNode, 'bgColor');
+    }
+
+    if (gradientFillNode != null) {
+      var gradientType = getAttribute(gradientFillNode, 'type') ?? 'linear';
+      var stops = <Stop>[];
+      gradientFillNode.children.forEach((node) {
+        if (node is XmlElement) {
+          stops.add(Stop()
+            ..position = getAttribute(node, 'position')
+            ..color = _getColor(node, 'color'));
+        }
+      });
+      var fill = GradientFill()
+        ..type = gradientType
+        ..stops = stops;
+
+      if (gradientType == "linear") {
+        fill.angle = getAttribute(gradientFillNode, 'degree');
+      } else {
+        fill.left = getAttribute(gradientFillNode, 'left');
+        fill.right = getAttribute(gradientFillNode, 'right');
+        fill.top = getAttribute(gradientFillNode, 'top');
+        fill.bottom = getAttribute(gradientFillNode, 'bottom');
+      }
+
+      return fill;
+    }
+  }
 }
