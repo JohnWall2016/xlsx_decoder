@@ -2,7 +2,7 @@ import 'package:xml/xml.dart';
 
 import './nodes.dart';
 
-XmlElement findChild(XmlElement node, String name) {
+XmlElement findChild(XmlNode node, String name) {
   return node.children
       .whereType<XmlElement>()
       .firstWhere((node) => node.name.local == name, orElse: () => null);
