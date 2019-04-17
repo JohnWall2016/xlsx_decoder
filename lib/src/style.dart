@@ -161,14 +161,16 @@ class Style {
       color = Color()..rgb = color;
     else if (color is int) color = Color()..theme = color;
 
-    setChildAttributes(node, name, {
-      'rgb': color?.rgb?.toUpperCase(),
-      'indexed': null,
-      'theme': color?.theme?.toString(),
-      'tint': color?.tint
-    });
+    if (color == null || color is Color) {
+      setChildAttributes(node, name, {
+        'rgb': color?.rgb?.toUpperCase(),
+        'indexed': null,
+        'theme': color?.theme?.toString(),
+        'tint': color?.tint
+      });
 
-    removeChildIfEmpty(node, 'color');
+      removeChildIfEmpty(node, 'color');
+    }
   }
 
   bool get bold => findChild(_fontNode, 'b') != null;
@@ -439,8 +441,8 @@ class Style {
     _borderNode.children.forEach((node) {
       if (node is XmlElement) {
         Side getSide() => Side()
-            ..style = getAttribute(node, 'style')
-            ..color = _getColor(node, 'color');
+          ..style = getAttribute(node, 'style')
+          ..color = _getColor(node, 'color');
 
         switch (node.name.local) {
           case 'left':
@@ -481,17 +483,21 @@ class Style {
       'top': border.top,
       'bottom': border.bottom,
       'diagonal': border.diagonal
-    }).forEach((name, side) {
+    })
+        .forEach((name, side) {
       var node = findChild(_borderNode, name);
       if (node != null) return;
-      
-      setAttributes(node, { 'style': side.style });
-      _setColor(node, 'color', side.color);
+
+      setAttributes(node, {'style': side?.style});
+      _setColor(node, 'color', side?.color);
 
       if (name == 'diagonal') {
         setAttributes(node, {
-          'diagonalUp': side.direction == 'up' || side.direction == 'both' ? '1' : null,
-          'diagonalDown': side.direction == 'down' || side.direction == 'both' ? '1' : null
+          'diagonalUp':
+              side?.direction == 'up' || side?.direction == 'both' ? '1' : null,
+          'diagonalDown': side?.direction == 'down' || side?.direction == 'both'
+              ? '1'
+              : null
         });
       }
     });
@@ -501,5 +507,85 @@ class Style {
 
   void set border(Border border) => _setBorder(border);
 
-  
+  Map<String, Color> get borderColor {
+    var border = _getBorder();
+    return ({
+      'left': border.left,
+      'right': border.right,
+      'top': border.top,
+      'bottom': border.bottom,
+      'diagonal': border.diagonal
+    })
+        .map((k, v) => MapEntry(k, v?.color));
+  }
+
+  void set borderColor(color) {
+    if (color is Color) {
+      color = <String, Color>{
+        'left': color,
+        'right': color,
+        'top': color,
+        'bottome': color,
+        'diagonal': color
+      };
+    }
+    if (color is Map<String, Color>) {
+      color.forEach((name, color) {
+        var node = findChild(_borderNode, name);
+        if (node != null) _setColor(node, 'color', color);
+      });
+    }
+  }
+
+  Map<String, String> get borderStyle {
+    var border = _getBorder();
+    return ({
+      'left': border.left,
+      'right': border.right,
+      'top': border.top,
+      'bottom': border.bottom,
+      'diagonal': border.diagonal
+    })
+        .map((k, v) => MapEntry(k, v?.style));
+  }
+
+  void set borderStyle(style) {
+    if (style is String) {
+      style = <String, String>{
+        'left': style,
+        'right': style,
+        'top': style,
+        'bottome': style,
+        'diagonal': style
+      };
+    }
+    if (style is Map<String, String>) {
+      style.forEach((name, style) {
+        var node = findChild(_borderNode, name);
+        if (node != null) setAttributes(node, {'style': style});
+      });
+    }
+  }
+
+  String get diagonalBorderDirection => _getBorder().diagonal?.direction;
+
+  void set diagonalBorderDirection(String direction) {
+    var node = findChild(_borderNode, 'diagonal');
+    if (node != null) {
+      setAttributes(node, {
+        'diagonalUp': direction == 'up' || direction == 'both' ? '1' : null,
+        'diagonalDown': direction == 'down' || direction == 'both' ? '1' : null
+      });
+    }
+  }
+
+  String get numberFormat {
+    var numFmtId = int.tryParse(getAttribute(_xfNode, 'numFmtId')) ?? 0;
+    return _styleSheet.getNumberFormatCode(numFmtId);
+  }
+
+  void set numberFormat(String formatCode) {
+    setAttributes(_xfNode,
+        {'numFmtId': _styleSheet.getNumberFormatId(formatCode).toString()});
+  }
 }

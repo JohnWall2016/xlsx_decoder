@@ -1,5 +1,6 @@
 import './document.dart';
 import './nodes.dart';
+import './style.dart';
 
 class StyleSheet extends Document {
   @override
@@ -123,6 +124,10 @@ class StyleSheet extends Document {
         if (id >= _nextNumFormatId) _nextNumFormatId = id + 1;
       }
     });
+  }
+
+  Style createStyle(int sourceId) {
+    
   }
 }
 
