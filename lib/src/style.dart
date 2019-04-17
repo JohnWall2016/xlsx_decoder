@@ -105,6 +105,18 @@ class GradientFill extends Fill {
   String left, right, top, bottom;
 }
 
+class Side {
+  String style;
+  Color color;
+  String direction;
+
+  bool get isEmpty => style == null && color == null && direction == null;
+}
+
+class Border {
+  Side left, right, top, bottom, diagonal;
+}
+
 class Style {
   StyleSheet _styleSheet;
   int _id;
@@ -142,16 +154,18 @@ class Style {
     return color;
   }
 
+  /// Set [color] to the child of [node] whose name is [name].
+  /// [color] can be a [Color] | [String] | [int] | [null].
   void _setColor(XmlElement node, String name, dynamic color) {
     if (color is String)
       color = Color()..rgb = color;
     else if (color is int) color = Color()..theme = color;
 
     setChildAttributes(node, name, {
-      'rgb': color.rgb?.toUpperCase(),
+      'rgb': color?.rgb?.toUpperCase(),
       'indexed': null,
-      'theme': color.theme?.toString(),
-      'tint': color.tint
+      'theme': color?.theme?.toString(),
+      'tint': color?.tint
     });
 
     removeChildIfEmpty(node, 'color');
@@ -345,16 +359,12 @@ class Style {
 
     if (patternType == "solid") {
       return SolidFill()..color = _getColor(patternFillNode, 'fgColor');
-    }
-
-    if (patternType != null) {
+    } else if (patternType != null) {
       return PatternFill()
         ..type = patternType
         ..foreground = _getColor(patternFillNode, 'fgColor')
         ..background = _getColor(patternFillNode, 'bgColor');
-    }
-
-    if (gradientFillNode != null) {
+    } else if (gradientFillNode != null) {
       var gradientType = getAttribute(gradientFillNode, 'type') ?? 'linear';
       var stops = <Stop>[];
       gradientFillNode.children.forEach((node) {
@@ -379,5 +389,117 @@ class Style {
 
       return fill;
     }
+
+    return null;
   }
+
+  void set fill(Fill fill) {
+    _fillNode.children.clear();
+
+    if (fill == null) return;
+
+    if (fill is SolidFill) {
+      var patternFill =
+          Element('patternFill', Attributes({'patternType': 'solid'}))
+              .toXmlNode();
+      _setColor(patternFill, 'fgColor', fill.color);
+      _fillNode.children.add(patternFill);
+      return;
+    } else if (fill is PatternFill) {
+      var patternFill =
+          Element('patternFill', Attributes({'patternType': fill.type}))
+              .toXmlNode();
+      _setColor(patternFill, 'fgColor', fill.foreground);
+      _setColor(patternFill, 'bgColor', fill.background);
+      _fillNode.children.add(patternFill);
+      return;
+    } else if (fill is GradientFill) {
+      var gradientFill = Element('gradientFill').toXmlNode();
+      setAttributes(gradientFill, {
+        'type': fill.type == 'path' ? 'path' : null,
+        'left': fill.left,
+        'right': fill.right,
+        'top': fill.top,
+        'bottom': fill.bottom,
+        'degree': fill.angle
+      });
+      fill.stops.forEach((stop) {
+        var node = Element('stop', Attributes({'position': stop.position}))
+            .toXmlNode();
+        _setColor(node, 'color', stop.color);
+        gradientFill.children.add(node);
+      });
+      _fillNode.children.add(gradientFill);
+      return;
+    }
+  }
+
+  Border _getBorder() {
+    var border = Border();
+    _borderNode.children.forEach((node) {
+      if (node is XmlElement) {
+        Side getSide() => Side()
+            ..style = getAttribute(node, 'style')
+            ..color = _getColor(node, 'color');
+
+        switch (node.name.local) {
+          case 'left':
+            border.left = getSide();
+            break;
+          case 'right':
+            border.right = getSide();
+            break;
+          case 'top':
+            border.top = getSide();
+            break;
+          case 'bottom':
+            border.bottom = getSide();
+            break;
+          case 'diagonal':
+            var up = getAttribute(_borderNode, 'diagonalUp');
+            var down = getAttribute(_borderNode, 'diagonalDown');
+            String direction;
+            if (up != null && down != null)
+              direction = 'both';
+            else if (up != null)
+              direction = 'up';
+            else if (down != null) direction = 'down';
+            border.diagonal = getSide()..direction = direction;
+            break;
+        }
+      }
+    });
+
+    return border;
+  }
+
+  void _setBorder(Border border) {
+    border ??= Border();
+    ({
+      'left': border.left,
+      'right': border.right,
+      'top': border.top,
+      'bottom': border.bottom,
+      'diagonal': border.diagonal
+    }).forEach((name, side) {
+      var node = findChild(_borderNode, name);
+      if (node != null) return;
+      
+      setAttributes(node, { 'style': side.style });
+      _setColor(node, 'color', side.color);
+
+      if (name == 'diagonal') {
+        setAttributes(node, {
+          'diagonalUp': side.direction == 'up' || side.direction == 'both' ? '1' : null,
+          'diagonalDown': side.direction == 'down' || side.direction == 'both' ? '1' : null
+        });
+      }
+    });
+  }
+
+  Border get border => _getBorder();
+
+  void set border(Border border) => _setBorder(border);
+
+  
 }

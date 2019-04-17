@@ -49,7 +49,7 @@ class Element extends Node {
   Attributes _attributes = Attributes();
   NodeList _children = NodeList();
 
-  Element(this._name);
+  Element(this._name, [this._attributes]);
 
   Attributes get attributes => _attributes;
 
