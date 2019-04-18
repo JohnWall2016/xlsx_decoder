@@ -1,8 +1,8 @@
-import './root_element.dart';
+import './attached_xml_element.dart';
 import './nodes.dart';
 
-class CoreProperties extends RootElement {
-  CoreProperties(XmlElement root) : super(root);
+class CoreProperties extends AttachedXmlElement {
+  CoreProperties(XmlElement node) : super(node);
 
   static const allowedProperties = {
     "title": "dc:title",

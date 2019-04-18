@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:archive/archive.dart';
 
-import './root_element.dart';
+import './attached_xml_element.dart';
 import './content_types.dart';
 import './app_properties.dart';
 import './core_properties.dart';
@@ -13,8 +13,8 @@ import './style_sheet.dart';
 import './xml_utils.dart';
 import './sheet.dart';
 
-class Workbook extends RootElement {
-  Workbook(XmlElement root) : super(root);
+class Workbook extends AttachedXmlElement {
+  Workbook(XmlElement node) : super(node);
 
   factory Workbook.fromFile(String path) {
     var data = File(path).readAsBytesSync();
@@ -56,7 +56,6 @@ class Workbook extends RootElement {
   StyleSheet get styleSheet => _styleSheet;
 
   void _init(XmlElement getRoot(String path)) {
-    
     _maxSheetId = 0;
     _sheets = [];
 
@@ -76,7 +75,7 @@ class Workbook extends RootElement {
           "application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml");
     }
 
-    _sheetsNode = findChild(root, "sheets");
+    _sheetsNode = findChild(thisNode, "sheets");
     for (var i = 0; i < _sheetsNode.children.length; i++) {
       var sheetIdNode = _sheetsNode.children[i] as XmlElement;
       var sheetId = int.parse(getAttribute(sheetIdNode, 'sheetId'));

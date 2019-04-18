@@ -1,9 +1,9 @@
-import './root_element.dart';
+import './attached_xml_element.dart';
 import './nodes.dart';
 
-class Relationships extends RootElement {
-  Relationships(XmlElement root)
-      : super(root ??
+class Relationships extends AttachedXmlElement {
+  Relationships(XmlElement node)
+      : super(node ??
             Element('Relationships', {
               'xmlns':
                   'http://schemas.openxmlformats.org/package/2006/relationships'

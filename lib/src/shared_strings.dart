@@ -1,9 +1,9 @@
-import './root_element.dart';
+import './attached_xml_element.dart';
 import './nodes.dart';
 
-class SharedStrings extends RootElement {
-  SharedStrings(XmlElement root)
-      : super(root ??
+class SharedStrings extends AttachedXmlElement {
+  SharedStrings(XmlElement node)
+      : super(node ??
             Element('sst', {
               'xmlns':
                   'http://schemas.openxmlformats.org/spreadsheetml/2006/main'

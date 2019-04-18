@@ -1,7 +1,7 @@
-import './root_element.dart';
+import './attached_xml_element.dart';
 
-class AppProperties extends RootElement {
-  AppProperties(XmlElement root) : super(root);
+class AppProperties extends AttachedXmlElement {
+  AppProperties(XmlElement node) : super(node);
 }
 
 /*

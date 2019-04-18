@@ -1,16 +1,16 @@
-import './root_element.dart';
+import './attached_xml_element.dart';
 import './nodes.dart';
 import './style.dart';
 import './xml_utils.dart';
 
-class StyleSheet extends RootElement {
+class StyleSheet extends AttachedXmlElement {
   XmlElement _numFmtsNode;
   XmlElement _fontsNode;
   XmlElement _fillsNode;
   XmlElement _bordersNode;
   XmlElement _cellXfsNode;
 
-  StyleSheet(XmlElement root) : super(root) {
+  StyleSheet(XmlElement node) : super(node) {
     elements.forEach((node) {
       switch (node.name.local) {
         case 'numFmts':

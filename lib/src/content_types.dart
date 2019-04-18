@@ -1,8 +1,8 @@
-import './root_element.dart';
+import './attached_xml_element.dart';
 import './nodes.dart';
 
-class ContentTypes extends RootElement {
-  ContentTypes(XmlElement root) : super(root);
+class ContentTypes extends AttachedXmlElement {
+  ContentTypes(XmlElement node) : super(node);
 
   XmlNode add(String partName, String contentType) {
     var node = (Element('Override')

@@ -1,11 +1,14 @@
 import './workbook.dart';
-import './root_element.dart';
+import './attached_xml_element.dart';
 import './nodes.dart';
 import './range.dart';
 import './relationships.dart';
+import './xml_utils.dart';
 
-class Sheet extends RootElement {
+class Sheet extends AttachedXmlElement {
   Workbook _workbook;
+  Workbook get workbook => _workbook;
+
   XmlElement _IdNode;
   XmlElement _sheetRelationshipsNode;
 
@@ -19,8 +22,7 @@ class Sheet extends RootElement {
 
   Relationships _relationships;
 
-  Sheet(Workbook workbook, XmlElement idNode, XmlElement node,
-      XmlElement relationshipsNode)
+  Sheet(this._workbook, _idNode, XmlElement node, XmlElement relationshipsNode)
       : super(node ??
             (Element('worksheet', {
               'xmlns':
@@ -35,9 +37,8 @@ class Sheet extends RootElement {
             })
                   ..children.add(Element('sheetData')))
                 .toXmlNode()) {
-    _workbook = workbook;
-    _IdNode = idNode;
-    
     _relationships = Relationships(relationshipsNode);
+
+    removeChild(thisNode, 'dimension');
   }
 }
