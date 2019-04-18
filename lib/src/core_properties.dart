@@ -1,9 +1,8 @@
-import './document.dart';
+import './root_element.dart';
 import './nodes.dart';
 
-class CoreProperties extends Document {
-  @override
-  String get id => 'docProps/core.xml';
+class CoreProperties extends RootElement {
+  CoreProperties(XmlElement root) : super(root);
 
   static const allowedProperties = {
     "title": "dc:title",

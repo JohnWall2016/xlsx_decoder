@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:archive/archive.dart';
 
-import './document.dart';
+import './root_element.dart';
 import './content_types.dart';
 import './app_properties.dart';
 import './core_properties.dart';
@@ -13,20 +13,30 @@ import './style_sheet.dart';
 import './xml_utils.dart';
 import './sheet.dart';
 
-class Workbook extends Document {
-  @override
-  String get id => 'xl/workbook.xml';
-
-  Workbook._new();
+class Workbook extends RootElement {
+  Workbook(XmlElement root) : super(root);
 
   factory Workbook.fromFile(String path) {
     var data = File(path).readAsBytesSync();
     return Workbook.fromData(data);
   }
 
-  factory Workbook.fromData(List<int> data) => Workbook._new().._init(data);
+  factory Workbook.fromData(List<int> data) {
+    var archive = ZipDecoder().decodeBytes(data);
+    
+    XmlElement getRoot(String path) {
+      var file = archive.findFile(path);
+      if (file == null) return null;
+      file.decompress();
+      return parse(utf8.decode(file.content))?.rootElement;
+    }
 
-  Archive _archive;
+    var workbook = Workbook(getRoot('xl/workbook.xml'))
+      .._init(getRoot);
+
+    return workbook;
+  }
+
   ContentTypes _contentTypes;
   AppProperties _appProperties;
   CoreProperties _coreProperties;
@@ -45,18 +55,17 @@ class Workbook extends Document {
   SharedStrings get sharedStrings => _sharedStrings;
   StyleSheet get styleSheet => _styleSheet;
 
-  void _init(data) {
+  void _init(XmlElement getRoot(String path)) {
+    
     _maxSheetId = 0;
     _sheets = [];
 
-    _archive = ZipDecoder().decodeBytes(data);
-    _contentTypes = _loadDocument(ContentTypes());
-    _appProperties = _loadDocument(AppProperties());
-    _coreProperties = _loadDocument(CoreProperties());
-    _relationships = _loadDocument(Relationships());
-    _sharedStrings = _loadDocument(SharedStrings());
-    _styleSheet = _loadDocument(StyleSheet());
-    _loadDocument(this);
+    _contentTypes = ContentTypes(getRoot('[Content_Types].xml'));
+    _appProperties = AppProperties(getRoot('docProps/app.xml'));
+    _coreProperties = CoreProperties(getRoot('docProps/core.xml'));
+    _relationships = Relationships(getRoot('xl/_rels/workbook.xml.rels'));
+    _sharedStrings = SharedStrings(getRoot('xl/sharedStrings.xml'));
+    _styleSheet = StyleSheet(getRoot('xl/styles.xml'));
 
     if (_relationships.findByType("sharedStrings") == null) {
       _relationships.add("sharedStrings", "sharedStrings.xml");
@@ -67,29 +76,20 @@ class Workbook extends Document {
           "application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml");
     }
 
-    _sheetsNode = findChild(document.rootElement, "sheets");
+    _sheetsNode = findChild(root, "sheets");
     for (var i = 0; i < _sheetsNode.children.length; i++) {
       var sheetIdNode = _sheetsNode.children[i] as XmlElement;
       var sheetId = int.parse(getAttribute(sheetIdNode, 'sheetId'));
       if (sheetId > _maxSheetId) _maxSheetId = sheetId;
 
-      var sheetNode = parseDocument('xl/worksheets/sheet${i + 1}.xml');
+      var sheetNode = getRoot('xl/worksheets/sheet${i + 1}.xml');
       var sheetRelationshipsNode =
-          parseDocument('xl/worksheets/_rels/sheet${i + 1}.xml.rels');
+          getRoot('xl/worksheets/_rels/sheet${i + 1}.xml.rels');
 
       _sheets.add(Sheet(this, sheetIdNode, sheetNode, sheetRelationshipsNode));
     }
   }
 
-  T _loadDocument<T extends Document>(T doc) =>
-      doc..load(parseDocument(doc.id));
-
-  XmlDocument parseDocument(String path) {
-    var file = _archive.findFile(path);
-    if (file == null) return null;
-    file.decompress();
-    return parse(utf8.decode(file.content));
-  }
 }
 
 /*

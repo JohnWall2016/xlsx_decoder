@@ -1,20 +1,20 @@
-import './document.dart';
+import './root_element.dart';
 import './nodes.dart';
 
-class Relationships extends Document {
-  @override
-  String get id => 'xl/_rels/workbook.xml.rels';
-
-  int _nextId = 1;
-
-  @override
-  void load(XmlDocument document) {
-    super.load(document ?? parse(emptyXml));
+class Relationships extends RootElement {
+  Relationships(XmlElement root)
+      : super(root ??
+            Element('Relationships', {
+              'xmlns':
+                  'http://schemas.openxmlformats.org/package/2006/relationships'
+            }).toXmlNode()) {
     elements.forEach((node) {
       var id = int.parse(node.getAttribute('Id').substring(3));
       if (id >= _nextId) _nextId = id + 1;
     });
   }
+
+  int _nextId = 1;
 
   XmlNode add(String type, String target, [String targetMode]) {
     var element = Element('Relationship')
@@ -36,9 +36,6 @@ class Relationships extends Document {
 
   static const relationshipSchemaPrefix =
       "http://schemas.openxmlformats.org/officeDocument/2006/relationships/";
-
-  static const emptyXml =
-      """<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>""";
 }
 
 /*

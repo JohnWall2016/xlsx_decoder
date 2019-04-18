@@ -1,11 +1,13 @@
 import './workbook.dart';
-import './document.dart';
+import './root_element.dart';
 
 class Sheet {
   Workbook _workbook;
   XmlElement _sheetIdNode;
-  XmlDocument _sheetNode, _sheetRelationshipsNode;
+  XmlElement _sheetNode, _sheetRelationshipsNode;
 
-  Sheet(this._workbook, this._sheetIdNode, this._sheetNode,
-      this._sheetRelationshipsNode);
+  Sheet(Workbook workbook, XmlElement idNode, XmlElement node,
+      XmlElement relationshipsNode) {
+    if (node == null) {}
+  }
 }

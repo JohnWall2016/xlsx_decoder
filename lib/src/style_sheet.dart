@@ -1,55 +1,16 @@
-import './document.dart';
+import './root_element.dart';
 import './nodes.dart';
 import './style.dart';
 import './xml_utils.dart';
 
-class StyleSheet extends Document {
-  @override
-  String get id => 'xl/styles.xml';
-
-  static const standardCodes = {
-    0: 'General',
-    1: '0',
-    2: '0.00',
-    3: '#,##0',
-    4: '#,##0.00',
-    9: '0%',
-    10: '0.00%',
-    11: '0.00E+00',
-    12: '# ?/?',
-    13: '# ??/??',
-    14: 'mm-dd-yy',
-    15: 'd-mmm-yy',
-    16: 'd-mmm',
-    17: 'mmm-yy',
-    18: 'h:mm AM/PM',
-    19: 'h:mm:ss AM/PM',
-    20: 'h:mm',
-    21: 'h:mm:ss',
-    22: 'm/d/yy h:mm',
-    37: '#,##0 ;(#,##0)',
-    38: '#,##0 ;[Red](#,##0)',
-    39: '#,##0.00;(#,##0.00)',
-    40: '#,##0.00;[Red](#,##0.00)',
-    45: 'mm:ss',
-    46: '[h]:mm:ss',
-    47: 'mmss.0',
-    48: '##0.0E+0',
-    49: '@'
-  };
-
-  static const startingCustomNumberFormatId = 164;
-
+class StyleSheet extends RootElement {
   XmlElement _numFmtsNode;
   XmlElement _fontsNode;
   XmlElement _fillsNode;
   XmlElement _bordersNode;
   XmlElement _cellXfsNode;
 
-  @override
-  void load(XmlDocument document) {
-    super.load(document);
-
+  StyleSheet(XmlElement root) : super(root) {
     elements.forEach((node) {
       switch (node.name.local) {
         case 'numFmts':
@@ -77,7 +38,7 @@ class StyleSheet extends Document {
 
     [_numFmtsNode, _fontsNode, _fillsNode, _bordersNode, _cellXfsNode]
         .forEach((node) {
-      node.attributes.removeWhere((attr) => attr.name.local == 'count');
+      node?.attributes?.removeWhere((attr) => attr.name.local == 'count');
     });
 
     _cacheNumberFormats();
@@ -184,6 +145,39 @@ class StyleSheet extends Document {
     return Style(this, _cellXfsNode.children.length - 1, xfNode, fontNode,
         fillNode, borderNode);
   }
+
+  static const startingCustomNumberFormatId = 164;
+
+  static const standardCodes = {
+    0: 'General',
+    1: '0',
+    2: '0.00',
+    3: '#,##0',
+    4: '#,##0.00',
+    9: '0%',
+    10: '0.00%',
+    11: '0.00E+00',
+    12: '# ?/?',
+    13: '# ??/??',
+    14: 'mm-dd-yy',
+    15: 'd-mmm-yy',
+    16: 'd-mmm',
+    17: 'mmm-yy',
+    18: 'h:mm AM/PM',
+    19: 'h:mm:ss AM/PM',
+    20: 'h:mm',
+    21: 'h:mm:ss',
+    22: 'm/d/yy h:mm',
+    37: '#,##0 ;(#,##0)',
+    38: '#,##0 ;[Red](#,##0)',
+    39: '#,##0.00;(#,##0.00)',
+    40: '#,##0.00;[Red](#,##0.00)',
+    45: 'mm:ss',
+    46: '[h]:mm:ss',
+    47: 'mmss.0',
+    48: '##0.0E+0',
+    49: '@'
+  };
 }
 
 /*

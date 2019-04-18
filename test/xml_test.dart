@@ -2,35 +2,25 @@ import 'package:xlsx_decoder/src/relationships.dart';
 import 'package:xlsx_decoder/xlsx_decoder.dart';
 
 void main(List<String> args) {
-  //testRelationships();
+  testRelationships();
 
   var workbook = Workbook.fromFile(args[0]);
-  /*print(workbook.contentTypes.document);
-  print(workbook.appProperties.document);
-  print(workbook.coreProperties.document);
-  print(workbook.relationships.document);
-  print(workbook.sharedStrings.document);
-  print(workbook.styleSheet.document);
-  print(workbook.document);*/
-  /*
-  print(workbook.coreProperties.document.rootElement.children.toString());*/
-
   testSharedString(workbook);
 }
 
 void testCoreProperties(Workbook workbook) {
-  print(workbook.coreProperties.document);
+  print(workbook.coreProperties.root);
   workbook.coreProperties['keywords'] = 'XLSX';
-  print(workbook.coreProperties.document);
+  print(workbook.coreProperties.root);
   workbook.coreProperties['keywords'] = 'DART';
-  print(workbook.coreProperties.document);
+  print(workbook.coreProperties.root);
 }
 
 void testRelationships() {
-  var rels = Relationships()..load(null);
+  var rels = Relationships(null);
   rels.add('styles', 'styles.xml');
   rels.add('theme', 'theme1.xml', 'UNKNOWN');
-  print(rels.document);
+  print(rels.root);
   print(rels.findById('rId1'));
   print(rels.findByType('theme'));
 }
@@ -39,5 +29,5 @@ void testSharedString(Workbook workbook) {
   //print(workbook.sharedStrings.document);
   //print(workbook.sharedStrings.getStringByIndex(0));
   workbook.sharedStrings.getIndexForString('刘德华');
-  print(workbook.sharedStrings.document.toXmlString(pretty: false));
+  print(workbook.sharedStrings.root.toXmlString(pretty: false));
 }

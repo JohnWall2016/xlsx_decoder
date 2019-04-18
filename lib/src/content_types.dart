@@ -1,9 +1,8 @@
-import './document.dart';
+import './root_element.dart';
 import './nodes.dart';
 
-class ContentTypes extends Document {
-  @override
-  String get id => '[Content_Types].xml';
+class ContentTypes extends RootElement {
+  ContentTypes(XmlElement root) : super(root);
 
   XmlNode add(String partName, String contentType) {
     var node = (Element('Override')

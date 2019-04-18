@@ -1,8 +1,7 @@
-import './document.dart';
+import './root_element.dart';
 
-class AppProperties extends Document {
-  @override
-  String get id => 'docProps/app.xml';
+class AppProperties extends RootElement {
+  AppProperties(XmlElement root) : super(root);
 }
 
 /*

@@ -1,23 +1,23 @@
-import './document.dart';
+import './root_element.dart';
 import './nodes.dart';
 
-class SharedStrings extends Document {
-  @override
-  String get id => 'xl/sharedStrings.xml';
-
-  List<dynamic> _nodeArray = [];
-
-  Map<dynamic, int> _indexMap = {};
-
-  @override
-  void load(XmlDocument document) {
-    super.load(document ?? parse(emptyXml));
-    document.rootElement.attributes.removeWhere((attr) {
+class SharedStrings extends RootElement {
+  SharedStrings(XmlElement root)
+      : super(root ??
+            Element('sst', {
+              'xmlns':
+                  'http://schemas.openxmlformats.org/spreadsheetml/2006/main'
+            })) {
+    attributes.removeWhere((attr) {
       return attr.name.local == 'count' || attr.name.local == 'uniqueCount';
     });
 
     _cacheExistingSharedStrings();
   }
+
+  List<dynamic> _nodeArray = [];
+
+  Map<dynamic, int> _indexMap = {};
 
   int getIndexForString(string) {
     var key = string.toString();
@@ -77,9 +77,6 @@ class SharedStrings extends Document {
       }
     });
   }
-
-  static const emptyXml =
-      """<?xml version="1.0" encoding="UTF-8" standalone="yes"?><sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"></sst>""";
 }
 
 /*
