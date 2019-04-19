@@ -68,6 +68,7 @@ void testValue(Workbook workbook) {
   print(date2);
   double date3 = sheet.cell('F4').value();
   print(date3);
+  print(sheet.cell('J6').value());
 
   print(sheet.lastRowIndex);
 
