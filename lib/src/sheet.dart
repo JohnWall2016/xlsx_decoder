@@ -11,8 +11,7 @@ class Sheet extends AttachedXmlElement {
   Workbook _workbook;
   Workbook get workbook => _workbook;
 
-  XmlElement _IdNode;
-  XmlElement _sheetRelationshipsNode;
+  XmlElement _idNode;
 
   int _maxSharedFormulaId = -1;
 
@@ -37,7 +36,7 @@ class Sheet extends AttachedXmlElement {
   XmlElement _hyperlinksNode;
   Map<String, XmlElement> _hyperlinks = {};
 
-  Sheet(this._workbook, _idNode, XmlElement node, XmlElement relationshipsNode)
+  Sheet(this._workbook, this._idNode, XmlElement node, XmlElement relationshipsNode)
       : super(node ??
             (Element('worksheet', {
               'xmlns':
