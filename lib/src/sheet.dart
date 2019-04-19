@@ -41,4 +41,11 @@ class Sheet extends AttachedXmlElement {
 
     removeChild(thisNode, 'dimension');
   }
+
+  updateMaxSharedFormulaId(int sharedFormulaId) {
+    if (sharedFormulaId > _maxSharedFormulaId) {
+      _maxSharedFormulaId = sharedFormulaId;
+    }
+  }
+
 }

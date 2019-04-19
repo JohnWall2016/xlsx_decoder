@@ -96,17 +96,17 @@ class StyleSheet extends AttachedXmlElement {
       xfNode = sourceXfNode.copy();
 
       if (getAttribute(sourceXfNode, 'applyFont') != null) {
-        var fontId = int.parse(getAttribute(sourceXfNode, 'fontId'));
+        int fontId = getAttribute(sourceXfNode, 'fontId');
         fontNode = _fontsNode.children[fontId].copy();
       }
 
       if (getAttribute(sourceXfNode, 'applyFill') != null) {
-        var fillId = int.parse(getAttribute(sourceXfNode, 'fillId'));
+        int fillId = getAttribute(sourceXfNode, 'fillId');
         fillNode = _fillsNode.children[fillId].copy();
       }
 
       if (getAttribute(sourceXfNode, 'applyBorder') != null) {
-        var borderId = int.parse(getAttribute(sourceXfNode, 'borderId'));
+        int borderId = getAttribute(sourceXfNode, 'borderId');
         borderNode = _bordersNode.children[borderId].copy();
       }
     }

@@ -578,7 +578,7 @@ class Style {
   }
 
   String get numberFormat {
-    var numFmtId = int.tryParse(getAttribute(_xfNode, 'numFmtId')) ?? 0;
+    var numFmtId = getAttribute(_xfNode, 'numFmtId') ?? 0;
     return _styleSheet.getNumberFormatCode(numFmtId);
   }
 

@@ -30,11 +30,18 @@ void setChildAttributes(XmlElement node, String name, Map<String, String> attrib
   setAttributes(child, attributes);
 }
 
-String getAttribute(XmlElement node, String attribute) {
+T getAttribute<T>(XmlElement node, String attribute) {
   var attr = node?.attributes?.firstWhere(
       (xmlAttr) => xmlAttr.name.local == attribute,
       orElse: () => null);
-  if (attr != null) return attr.value;
+  if (attr != null && attr.value != null) {
+    if (T == int) return int.tryParse(attr.value) as T;
+    else if (T == double) return double.tryParse(attr.value) as T;
+    else if (T == String) return attr.value as T;
+    else if (T == Object || T == dynamic) {
+      return attr.value as T;
+    }
+  }
   return null;
 }
 

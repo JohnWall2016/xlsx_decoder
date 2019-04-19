@@ -44,4 +44,11 @@ void testXml() {
 ''').rootElement;
   print(node);
   print(findChild(node, 'v').children[0].text);
+  double s = getAttribute(node, 's');
+  print(s);
+  String t = getAttribute(node, 't');
+  print(t);
+  print(getAttribute(node, 't') == null);
+  getAttribute(node, 't');
+  print(getAttribute(node, 't'));
 }

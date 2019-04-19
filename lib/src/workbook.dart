@@ -78,7 +78,7 @@ class Workbook extends AttachedXmlElement {
     _sheetsNode = findChild(thisNode, "sheets");
     for (var i = 0; i < _sheetsNode.children.length; i++) {
       var sheetIdNode = _sheetsNode.children[i] as XmlElement;
-      var sheetId = int.parse(getAttribute(sheetIdNode, 'sheetId'));
+      int sheetId = getAttribute(sheetIdNode, 'sheetId');
       if (sheetId > _maxSheetId) _maxSheetId = sheetId;
 
       var sheetNode = getRoot('xl/worksheets/sheet${i + 1}.xml');

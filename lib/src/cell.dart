@@ -4,11 +4,12 @@ import './address_converter.dart';
 import './xml_utils.dart';
 import './workbook.dart';
 import './formula_error.dart';
+import './sheet.dart';
 
 class Cell {
   Row _row;
   Row get row => _row;
-
+  Sheet get sheet => _row?.sheet;
   Workbook get workbook => _row?.workbook;
 
   int _column;
@@ -16,12 +17,17 @@ class Cell {
 
   dynamic _value;
 
+  List<XmlAttribute> _remainingAttributes = [];
+
+  String _formulaType;
+  String _formulaRef;
+  String _formula;
+  int _sharedFormulaId;
+
   T value<T>() {
     if (_value is T) return _value as T;
     return null;
   }
-
-  List<XmlAttribute> _remainingAttributes = [];
 
   Cell(this._row, XmlElement node) {
     _parseNode(node);
@@ -82,7 +88,18 @@ class Cell {
       }
     });
 
-    // TODO(WJ): Parse the formula if present..
+    // Parse the formula if present..
+    var fNode = findChild(node, 'f');
+    if (fNode != null) {
+      _formulaType = getAttribute(node, 't') ?? 'normal';
+      _formulaRef = getAttribute(node, 'ref');
+      _formula = fNode.children[0].text;
+
+      _sharedFormulaId = getAttribute(node, 'si');
+      if (_sharedFormulaId != null) {
+        //sheet.updateMaxSharedFormulaId(_sharedFormulaId)
+      }
+    }
 
     // TODO(WJ): If any unknown children are still present, store them for later output.
   }
