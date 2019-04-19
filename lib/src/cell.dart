@@ -13,16 +13,18 @@ class Cell {
   Workbook get workbook => _row?.workbook;
 
   int _column;
+  int get column => _column;
   int _styleId;
-
   dynamic _value;
-
   List<XmlAttribute> _remainingAttributes = [];
 
   String _formulaType;
   String _formulaRef;
   String _formula;
   int _sharedFormulaId;
+  List<XmlAttribute> _remainingFormulaAttributes = [];
+
+  List<XmlNode> _remainingChildren;
 
   T value<T>() {
     if (_value is T) return _value as T;
@@ -91,16 +93,32 @@ class Cell {
     // Parse the formula if present..
     var fNode = findChild(node, 'f');
     if (fNode != null) {
-      _formulaType = getAttribute(node, 't') ?? 'normal';
-      _formulaRef = getAttribute(node, 'ref');
+      fNode.attributes.forEach((attr) {
+        switch (attr.name.local) {
+          case 't':
+            _formulaType = attr.value ?? 'normal';
+            break;
+          case 'ref':
+            _formulaRef = attr.value;
+            break;
+          case 'si':
+            _sharedFormulaId = int.tryParse(attr.value);
+            if (_sharedFormulaId != null) {
+              sheet?.updateMaxSharedFormulaId(_sharedFormulaId);
+            }
+            break;
+          default:
+            _remainingFormulaAttributes.add(attr);
+        }
+      });
       _formula = fNode.children[0].text;
-
-      _sharedFormulaId = getAttribute(node, 'si');
-      if (_sharedFormulaId != null) {
-        //sheet.updateMaxSharedFormulaId(_sharedFormulaId)
-      }
     }
 
-    // TODO(WJ): If any unknown children are still present, store them for later output.
+    // If any unknown children are still present, store them for later output.
+    removeChild(node, 'f');
+    removeChild(node, 'v');
+    removeChild(node, 'is');
+    
+    _remainingChildren = node.children;
   }
 }

@@ -4,6 +4,8 @@ import './nodes.dart';
 import './range.dart';
 import './relationships.dart';
 import './xml_utils.dart';
+import './row.dart';
+import './column.dart';
 
 class Sheet extends AttachedXmlElement {
   Workbook _workbook;
@@ -21,6 +23,9 @@ class Sheet extends AttachedXmlElement {
   Range _autoFilter = null;
 
   Relationships _relationships;
+
+  List<Row> _rows = [];
+  List<Column> _columns = [];
 
   Sheet(this._workbook, _idNode, XmlElement node, XmlElement relationshipsNode)
       : super(node ??
@@ -40,6 +45,14 @@ class Sheet extends AttachedXmlElement {
     _relationships = Relationships(relationshipsNode);
 
     removeChild(thisNode, 'dimension');
+
+    var sheetDataNode = findChild(thisNode, 'sheetData');
+    sheetDataNode.children.forEach((rowNode) {
+      var row = Row(this, rowNode);
+      _rows[row.row] = row;
+    });
+
+
   }
 
   updateMaxSharedFormulaId(int sharedFormulaId) {
