@@ -8,7 +8,7 @@ XmlElement findChild(XmlNode node, String name) {
       .firstWhere((node) => node.name.local == name, orElse: () => null);
 }
 
-void setAttributes(XmlElement node, Map<String, String> attributes) {
+void setAttributes<T>(XmlElement node, Map<String, T> attributes) {
   List<XmlAttribute> xmlAttrs = [];
   node.attributes.forEach((xmlAttr) {
     if (!attributes.containsKey(xmlAttr.name.local)) {
@@ -16,7 +16,7 @@ void setAttributes(XmlElement node, Map<String, String> attributes) {
     } else {
       var value = attributes[xmlAttr.name.local];
       if (value != null) {
-        xmlAttr.value = value;
+        xmlAttr.value = value.toString();
         xmlAttrs.add(xmlAttr);
       }
     }
@@ -25,9 +25,9 @@ void setAttributes(XmlElement node, Map<String, String> attributes) {
   node.attributes.addAll(xmlAttrs);
 }
 
-void setChildAttributes(XmlElement node, String name, Map<String, String> attributes) {
+void setChildAttributes<T>(XmlElement node, String name, Map<String, T> attributes) {
   var child = appendChildIfNotFound(node, name);
-  setAttributes(child, attributes);
+  setAttributes<T>(child, attributes);
 }
 
 T getAttribute<T>(XmlElement node, String attribute) {
@@ -45,9 +45,9 @@ T getAttribute<T>(XmlElement node, String attribute) {
   return null;
 }
 
-String getChildAttribute(XmlElement node, String name, String attribute) {
+T getChildAttribute<T>(XmlElement node, String name, String attribute) {
   var child = findChild(node, name);
-  if (child != null) return getAttribute(child, attribute);
+  if (child != null) return getAttribute<T>(child, attribute);
   return null;
 }
 
