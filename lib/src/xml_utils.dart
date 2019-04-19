@@ -46,7 +46,9 @@ void setChildAttributes<T>(
 }
 
 T getAttribute<T>(XmlElement node, String attribute) {
-  var attr = node?.attributes?.firstWhere(
+  if (node == null) return null;
+
+  var attr = node.attributes.firstWhere(
       (xmlAttr) => xmlAttr.name.local == attribute,
       orElse: () => null);
   if (attr != null && attr.value != null) {

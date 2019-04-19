@@ -38,6 +38,7 @@ class Cell {
   Cell.create(this._row, this._column, [this._styleId]);
 
   void _parseNode(XmlElement node) {
+    String type;
     node.attributes.forEach((attr) {
       switch (attr.name.local) {
         case 'r':
@@ -48,47 +49,48 @@ class Cell {
           _styleId = int.parse(attr.value);
           break;
         case 't':
-          switch (attr.value) {
-            // Parse the value.
-            case 's':
-              // String value.
-              var sharedIndex =
-                  int.parse(findChild(node, 'v').children[0].text);
-              _value = workbook.sharedStrings.getStringByIndex(sharedIndex);
-              break;
-            case 'str':
-              // Simple string value.
-              _value = findChild(node, 'v').children[0].text;
-              break;
-            case 'inlineStr':
-              // Inline string value: can be simple text or rich text.
-              var isNode = findChild(node, 'is');
-              XmlElement tNode = isNode.children[0];
-              if (tNode.name.local == 't') {
-                _value = tNode.children[0].text;
-              } else {
-                _value = isNode.children;
-              }
-              break;
-            case 'b':
-              // Boolean value.
-              _value = findChild(node, 'v').children[0].text == '1';
-              break;
-            case 'e':
-              // Error value.
-              _value =
-                  FormulaError.getError(findChild(node, 'v').children[0].text);
-              break;
-            default:
-              // Number value.
-              _value = double.parse(findChild(node, 'v').children[0].text);
-              break;
-          }
+          type = attr.value;
           break;
         default:
           _remainingAttributes.add(attr);
       }
     });
+
+    // Parse the value.
+    switch (type) {
+      case 's':
+        // String value.
+        var sharedIndex = int.parse(findChild(node, 'v').children[0].text);
+        _value = workbook.sharedStrings.getStringByIndex(sharedIndex);
+        break;
+      case 'str':
+        // Simple string value.
+        _value = findChild(node, 'v').children[0].text;
+        break;
+      case 'inlineStr':
+        // Inline string value: can be simple text or rich text.
+        var isNode = findChild(node, 'is');
+        XmlElement tNode = isNode.children[0];
+        if (tNode.name.local == 't') {
+          _value = tNode.children[0].text;
+        } else {
+          _value = isNode.children;
+        }
+        break;
+      case 'b':
+        // Boolean value.
+        _value = findChild(node, 'v').children[0].text == '1';
+        break;
+      case 'e':
+        // Error value.
+        _value = FormulaError.getError(findChild(node, 'v').children[0].text);
+        break;
+      default:
+        // Number value.
+        var vNode = findChild(node, 'v');
+        _value = vNode != null ? double.parse(vNode.children[0].text) : null;
+        break;
+    }
 
     // Parse the formula if present..
     var fNode = findChild(node, 'f');
@@ -118,7 +120,7 @@ class Cell {
     removeChild(node, 'f');
     removeChild(node, 'v');
     removeChild(node, 'is');
-    
+
     _remainingChildren = node.children;
   }
 }

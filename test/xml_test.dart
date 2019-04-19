@@ -4,11 +4,12 @@ import 'package:xml/xml.dart';
 import 'package:xlsx_decoder/src/xml_utils.dart';
 
 void main(List<String> args) {
-  testRelationships();
+  //testRelationships();
 
   var workbook = Workbook.fromFile(args[0]);
-  testSharedString(workbook);
+  //testSharedString(workbook);
   //testXml();
+  testValue(workbook);
 }
 
 void testCoreProperties(Workbook workbook) {
@@ -51,4 +52,14 @@ void testXml() {
   print(getAttribute(node, 't') == null);
   getAttribute(node, 't');
   print(getAttribute(node, 't'));
+}
+
+void testValue(Workbook workbook) {
+  var sheet = workbook.sheetAt(0);
+  String title = sheet.cell('A1').value();
+  print(title);
+  String name = sheet.cell('B4').value();
+  print(name);
+  double money = sheet.cell('E4').value();
+  print(money);
 }

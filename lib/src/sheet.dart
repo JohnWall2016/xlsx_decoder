@@ -6,6 +6,8 @@ import './relationships.dart';
 import './xml_utils.dart';
 import './row.dart';
 import './column.dart';
+import './cell.dart';
+import './address_converter.dart';
 
 class Sheet extends AttachedXmlElement {
   Workbook _workbook;
@@ -15,7 +17,7 @@ class Sheet extends AttachedXmlElement {
 
   int _maxSharedFormulaId = -1;
 
-  Range _autoFilter = null;
+  Range _autoFilter;
 
   Relationships _relationships;
 
@@ -35,10 +37,6 @@ class Sheet extends AttachedXmlElement {
 
   XmlElement _hyperlinksNode;
   Map<String, XmlElement> _hyperlinks = {};
-
-  String get name => getAttribute(_idNode, 'name');
-
-  void set name(String name) => setAttribute(_idNode, 'name', name);
 
   Sheet(this._workbook, this._idNode, XmlElement node,
       XmlElement relationshipsNode)
@@ -63,7 +61,7 @@ class Sheet extends AttachedXmlElement {
     var sheetDataNode = findChild(thisNode, 'sheetData');
     sheetDataNode.children.forEach((rowNode) {
       var row = Row(this, rowNode);
-      _rows[row.row] = row;
+      _rows[row.index] = row;
     });
 
     _colsNode = findChild(thisNode, 'cols');
@@ -125,6 +123,35 @@ class Sheet extends AttachedXmlElement {
       _hyperlinks[getAttribute(hyperlinkNode, 'ref')] = hyperlinkNode;
     });
     _hyperlinksNode.children.clear();
+  }
+
+  String get name => getAttribute(_idNode, 'name');
+
+  void set name(String name) => setAttribute(_idNode, 'name', name);
+
+  Row rowAt(int index) {
+    var row = _rows[index];
+    if (row != null) return row;
+
+    var rowNode = Element('row', { 'r': index }).toXmlNode();
+
+    row = Row(this, rowNode);
+    _rows[index] = row;
+    return row;
+  }
+
+  Cell cellAt(int row, int column) => rowAt(row).cellAt(column);
+
+  Cell cell(String cellName) {
+    var ref = CellRef.fromAddress(cellName);
+    if (ref == null) throw 'Invalid cell name';
+
+    return cellAt(ref.row, ref.column);
+  }
+
+  int existingColumnStyleId(int column) {
+    var colNode = _colNodes[column];
+    return getAttribute(colNode, 'style');
   }
 
   updateMaxSharedFormulaId(int sharedFormulaId) {
