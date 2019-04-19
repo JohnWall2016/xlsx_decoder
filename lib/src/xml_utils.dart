@@ -19,23 +19,28 @@ int findChildIndex(XmlNode node, String name) {
 }
 
 void setAttributes<T>(XmlElement node, Map<String, T> attributes) {
+  var attrs = Map.from(attributes);
   List<XmlAttribute> xmlAttrs = [];
   node.attributes.forEach((xmlAttr) {
-    if (!attributes.containsKey(xmlAttr.name.local)) {
+    var key = xmlAttr.name.local;
+    if (!attrs.containsKey(key)) {
       xmlAttrs.add(xmlAttr);
     } else {
-      var value = attributes[xmlAttr.name.local];
+      var value = attrs[key];
       if (value != null) {
         xmlAttr.value = value.toString();
         xmlAttrs.add(xmlAttr);
       }
+      attrs.remove(key);
     }
   });
   node.attributes.clear();
   node.attributes.addAll(xmlAttrs);
+  node.attributes.addAll(Attributes(attrs).toXml());
 }
 
-void setChildAttributes<T>(XmlElement node, String name, Map<String, T> attributes) {
+void setChildAttributes<T>(
+    XmlElement node, String name, Map<String, T> attributes) {
   var child = appendChildIfNotFound(node, name);
   setAttributes<T>(child, attributes);
 }
@@ -45,14 +50,31 @@ T getAttribute<T>(XmlElement node, String attribute) {
       (xmlAttr) => xmlAttr.name.local == attribute,
       orElse: () => null);
   if (attr != null && attr.value != null) {
-    if (T == int) return int.tryParse(attr.value) as T;
-    else if (T == double) return double.tryParse(attr.value) as T;
-    else if (T == String) return attr.value as T;
+    if (T == int)
+      return int.tryParse(attr.value) as T;
+    else if (T == double)
+      return double.tryParse(attr.value) as T;
+    else if (T == String)
+      return attr.value as T;
     else if (T == Object || T == dynamic) {
       return attr.value as T;
     }
   }
   return null;
+}
+
+XmlAttribute toXmlAttribute<T>(String key, T value) =>
+    XmlAttribute(XmlName(key), value.toString());
+
+void setAttribute<T>(XmlElement node, String attribute, T value) {
+  if (node == null) return;
+  var attr = node.attributes.firstWhere(
+      (xmlAttr) => xmlAttr.name.local == attribute,
+      orElse: () => null);
+  if (attr != null)
+    attr.value = value.toString();
+  else
+    node.attributes.add(toXmlAttribute(attribute, value));
 }
 
 T getChildAttribute<T>(XmlElement node, String name, String attribute) {
@@ -81,8 +103,8 @@ XmlElement appendChildIfNotFound(XmlElement node, String name) {
 /// [String]|[XmlNode] [name]
 void removeChild(XmlElement node, dynamic nameOrNode) {
   if (nameOrNode is String) {
-    node.children
-        .removeWhere((node) => node is XmlElement && node.name.local == nameOrNode);
+    node.children.removeWhere(
+        (node) => node is XmlElement && node.name.local == nameOrNode);
   } else if (nameOrNode is XmlNode) {
     node.children.remove(nameOrNode);
   }

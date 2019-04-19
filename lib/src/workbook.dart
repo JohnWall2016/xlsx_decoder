@@ -23,7 +23,7 @@ class Workbook extends AttachedXmlElement {
 
   factory Workbook.fromData(List<int> data) {
     var archive = ZipDecoder().decodeBytes(data);
-    
+
     XmlElement getRoot(String path) {
       var file = archive.findFile(path);
       if (file == null) return null;
@@ -31,8 +31,7 @@ class Workbook extends AttachedXmlElement {
       return parse(utf8.decode(file.content))?.rootElement;
     }
 
-    var workbook = Workbook(getRoot('xl/workbook.xml'))
-      .._init(getRoot);
+    var workbook = Workbook(getRoot('xl/workbook.xml')).._init(getRoot);
 
     return workbook;
   }
@@ -89,6 +88,9 @@ class Workbook extends AttachedXmlElement {
     }
   }
 
+  Sheet sheet(String name) => _sheets.firstWhere((sheet) => sheet.name == name);
+
+  Sheet sheetAt(int index) => _sheets[index];
 }
 
 /*

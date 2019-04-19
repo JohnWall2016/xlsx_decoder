@@ -13,19 +13,19 @@ class Text extends Node {
   XmlNode toXmlNode() => XmlText(_text);
 }
 
-class Attributes {
-  Map<String, String> _attributes;
+class Attributes<T> {
+  Map<String, T> _attributes;
 
-  void operator []=(String key, String value) => _attributes[key] = value;
+  void operator []=(String key, T value) => _attributes[key] = value;
 
-  String operator [](String key) => _attributes[key];
+  String operator [](String key) => _attributes[key].toString();
 
   Attributes([this._attributes]) {
     if (_attributes == null) _attributes = {};
   }
 
   Iterable<XmlAttribute> toXml() => _attributes.entries
-      .map((entry) => XmlAttribute(XmlName(entry.key), entry.value));
+      .map((entry) => XmlAttribute(XmlName(entry.key), entry.value.toString()));
 
   Iterable<String> get keys => _attributes.keys;
 

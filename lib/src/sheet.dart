@@ -36,7 +36,12 @@ class Sheet extends AttachedXmlElement {
   XmlElement _hyperlinksNode;
   Map<String, XmlElement> _hyperlinks = {};
 
-  Sheet(this._workbook, this._idNode, XmlElement node, XmlElement relationshipsNode)
+  String get name => getAttribute(_idNode, 'name');
+
+  void set name(String name) => setAttribute(_idNode, 'name', name);
+
+  Sheet(this._workbook, this._idNode, XmlElement node,
+      XmlElement relationshipsNode)
       : super(node ??
             (Element('worksheet', {
               'xmlns':
@@ -101,8 +106,11 @@ class Sheet extends AttachedXmlElement {
       _dataValidationsNode = Element('dataValidations').toXmlNode();
     }
 
-    _dataValidationsNode.children.whereType<XmlElement>().forEach((dataValidationNode) {
-      _dataValidations[getAttribute(dataValidationNode, 'sqref')] = dataValidationNode;
+    _dataValidationsNode.children
+        .whereType<XmlElement>()
+        .forEach((dataValidationNode) {
+      _dataValidations[getAttribute(dataValidationNode, 'sqref')] =
+          dataValidationNode;
     });
     _dataValidationsNode.children.clear();
 
@@ -125,15 +133,44 @@ class Sheet extends AttachedXmlElement {
     }
   }
 
-
   static const nodeOrder = [
-    "sheetPr", "dimension", "sheetViews", "sheetFormatPr", "cols", "sheetData",
-    "sheetCalcPr", "sheetProtection", "autoFilter", "protectedRanges", "scenarios", "autoFilter",
-    "sortState", "dataConsolidate", "customSheetViews", "mergeCells", "phoneticPr",
-    "conditionalFormatting", "dataValidations", "hyperlinks", "printOptions",
-    "pageMargins", "pageSetup", "headerFooter", "rowBreaks", "colBreaks",
-    "customProperties", "cellWatches", "ignoredErrors", "smartTags", "drawing",
-    "drawingHF", "picture", "oleObjects", "controls", "webPublishItems", "tableParts",
+    "sheetPr",
+    "dimension",
+    "sheetViews",
+    "sheetFormatPr",
+    "cols",
+    "sheetData",
+    "sheetCalcPr",
+    "sheetProtection",
+    "autoFilter",
+    "protectedRanges",
+    "scenarios",
+    "autoFilter",
+    "sortState",
+    "dataConsolidate",
+    "customSheetViews",
+    "mergeCells",
+    "phoneticPr",
+    "conditionalFormatting",
+    "dataValidations",
+    "hyperlinks",
+    "printOptions",
+    "pageMargins",
+    "pageSetup",
+    "headerFooter",
+    "rowBreaks",
+    "colBreaks",
+    "customProperties",
+    "cellWatches",
+    "ignoredErrors",
+    "smartTags",
+    "drawing",
+    "drawingHF",
+    "picture",
+    "oleObjects",
+    "controls",
+    "webPublishItems",
+    "tableParts",
     "extLst"
   ];
 }
