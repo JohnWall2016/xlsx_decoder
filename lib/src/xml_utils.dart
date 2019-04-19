@@ -8,6 +8,16 @@ XmlElement findChild(XmlNode node, String name) {
       .firstWhere((node) => node.name.local == name, orElse: () => null);
 }
 
+int findChildIndex(XmlNode node, String name) {
+  for (var i = 0; i < node.children.length; i++) {
+    var child = node.children[i];
+    if (child is XmlElement && child.name.local == name) {
+      return i;
+    }
+  }
+  return -1;
+}
+
 void setAttributes<T>(XmlElement node, Map<String, T> attributes) {
   List<XmlAttribute> xmlAttrs = [];
   node.attributes.forEach((xmlAttr) {
@@ -68,7 +78,27 @@ XmlElement appendChildIfNotFound(XmlElement node, String name) {
   return child;
 }
 
-void removeChild(XmlElement node, String name) {
-  node.children
-      .removeWhere((node) => node is XmlElement && node.name.local == name);
+/// [String]|[XmlNode] [name]
+void removeChild(XmlElement node, dynamic nameOrNode) {
+  if (nameOrNode is String) {
+    node.children
+        .removeWhere((node) => node is XmlElement && node.name.local == nameOrNode);
+  } else if (nameOrNode is XmlNode) {
+    node.children.remove(nameOrNode);
+  }
+}
+
+void insertInOrder(XmlElement node, XmlElement child, List<String> nodeOrder) {
+  var index = nodeOrder.indexOf(child.name.local);
+  if (index >= 0) {
+    for (var i = index + 1; i < nodeOrder.length; i++) {
+      var name = nodeOrder[i];
+      var siblingIndex = findChildIndex(node, name);
+      if (siblingIndex >= 0) {
+        node.children.insert(siblingIndex, child);
+        return;
+      }
+    }
+  }
+  node.children.add(child);
 }

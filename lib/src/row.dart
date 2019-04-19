@@ -9,7 +9,7 @@ class Row extends AttachedXmlElement {
   Sheet get sheet => _sheet;
   Workbook get workbook => _sheet?.workbook;
 
-  List<Cell> _cells = [];
+  Map<int, Cell> _cells = {};
   
   Row(this._sheet, XmlElement node) : super(node) {
     elements.forEach((cellNode) {

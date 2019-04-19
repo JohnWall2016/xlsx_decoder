@@ -4,11 +4,11 @@ import 'package:xml/xml.dart';
 import 'package:xlsx_decoder/src/xml_utils.dart';
 
 void main(List<String> args) {
-  /*testRelationships();
+  testRelationships();
 
   var workbook = Workbook.fromFile(args[0]);
-  testSharedString(workbook);*/
-  testXml();
+  testSharedString(workbook);
+  //testXml();
 }
 
 void testCoreProperties(Workbook workbook) {

@@ -16,16 +16,26 @@ class Sheet extends AttachedXmlElement {
 
   int _maxSharedFormulaId = -1;
 
-  Map<String, XmlElement> _mergeCells = {};
-  Map<String, XmlElement> _dataValidations = {};
-  Map<String, XmlElement> _hyperlinks = {};
-
   Range _autoFilter = null;
 
   Relationships _relationships;
 
-  List<Row> _rows = [];
+  Map<int, Row> _rows = {};
   List<Column> _columns = [];
+
+  XmlElement _colsNode;
+  Map<int, XmlElement> _colNodes = {};
+
+  XmlElement _sheetPrNode;
+
+  XmlElement _mergeCellsNode;
+  Map<String, XmlElement> _mergeCells = {};
+
+  XmlElement _dataValidationsNode;
+  Map<String, XmlElement> _dataValidations = {};
+
+  XmlElement _hyperlinksNode;
+  Map<String, XmlElement> _hyperlinks = {};
 
   Sheet(this._workbook, _idNode, XmlElement node, XmlElement relationshipsNode)
       : super(node ??
@@ -52,7 +62,62 @@ class Sheet extends AttachedXmlElement {
       _rows[row.row] = row;
     });
 
+    _colsNode = findChild(thisNode, 'cols');
+    if (_colsNode != null) {
+      removeChild(thisNode, _colsNode);
+    } else {
+      _colsNode = Element('cols').toXmlNode();
+    }
 
+    _colsNode.children.whereType<XmlElement>().forEach((colNode) {
+      int min = getAttribute(colNode, 'min');
+      int max = getAttribute(colNode, 'max');
+      for (var i = min; i <= max; i++) {
+        _colNodes[i] = colNode;
+      }
+    });
+
+    _sheetPrNode = findChild(thisNode, 'sheetPr');
+    if (_sheetPrNode == null) {
+      _sheetPrNode = Element('sheetPr').toXmlNode();
+      insertInOrder(thisNode, _sheetPrNode, nodeOrder);
+    }
+
+    _mergeCellsNode = findChild(thisNode, 'mergeCells');
+    if (_mergeCellsNode != null) {
+      removeChild(thisNode, _mergeCellsNode);
+    } else {
+      _mergeCellsNode = Element('mergeCells').toXmlNode();
+    }
+
+    _mergeCellsNode.children.whereType<XmlElement>().forEach((mergeCellNode) {
+      _mergeCells[getAttribute(mergeCellNode, 'ref')] = mergeCellNode;
+    });
+    _mergeCellsNode.children.clear();
+
+    _dataValidationsNode = findChild(thisNode, 'dataValidations');
+    if (_dataValidationsNode != null) {
+      removeChild(thisNode, _dataValidationsNode);
+    } else {
+      _dataValidationsNode = Element('dataValidations').toXmlNode();
+    }
+
+    _dataValidationsNode.children.whereType<XmlElement>().forEach((dataValidationNode) {
+      _dataValidations[getAttribute(dataValidationNode, 'sqref')] = dataValidationNode;
+    });
+    _dataValidationsNode.children.clear();
+
+    _hyperlinksNode = findChild(thisNode, 'hyperlinks');
+    if (_hyperlinksNode != null) {
+      removeChild(thisNode, _hyperlinksNode);
+    } else {
+      _hyperlinksNode = Element('hyperlinks').toXmlNode();
+    }
+
+    _hyperlinksNode.children.whereType<XmlElement>().forEach((hyperlinkNode) {
+      _hyperlinks[getAttribute(hyperlinkNode, 'ref')] = hyperlinkNode;
+    });
+    _hyperlinksNode.children.clear();
   }
 
   updateMaxSharedFormulaId(int sharedFormulaId) {
@@ -61,4 +126,15 @@ class Sheet extends AttachedXmlElement {
     }
   }
 
+
+  static const nodeOrder = [
+    "sheetPr", "dimension", "sheetViews", "sheetFormatPr", "cols", "sheetData",
+    "sheetCalcPr", "sheetProtection", "autoFilter", "protectedRanges", "scenarios", "autoFilter",
+    "sortState", "dataConsolidate", "customSheetViews", "mergeCells", "phoneticPr",
+    "conditionalFormatting", "dataValidations", "hyperlinks", "printOptions",
+    "pageMargins", "pageSetup", "headerFooter", "rowBreaks", "colBreaks",
+    "customProperties", "cellWatches", "ignoredErrors", "smartTags", "drawing",
+    "drawingHF", "picture", "oleObjects", "controls", "webPublishItems", "tableParts",
+    "extLst"
+  ];
 }
