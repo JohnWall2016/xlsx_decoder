@@ -21,6 +21,9 @@ class Sheet extends AttachedXmlElement {
 
   Relationships _relationships;
 
+  int _lastRowIndex = -1;
+  int get lastRowIndex => _lastRowIndex;
+
   Map<int, Row> _rows = {};
   List<Column> _columns = [];
 
@@ -61,7 +64,9 @@ class Sheet extends AttachedXmlElement {
     var sheetDataNode = findChild(thisNode, 'sheetData');
     sheetDataNode.children.forEach((rowNode) {
       var row = Row(this, rowNode);
-      _rows[row.index] = row;
+      var index = row.index;
+      if (index > _lastRowIndex) _lastRowIndex = index;
+      _rows[index] = row;
     });
 
     _colsNode = findChild(thisNode, 'cols');
@@ -133,10 +138,11 @@ class Sheet extends AttachedXmlElement {
     var row = _rows[index];
     if (row != null) return row;
 
-    var rowNode = Element('row', { 'r': index }).toXmlNode();
+    var rowNode = Element('row', {'r': index}).toXmlNode();
 
     row = Row(this, rowNode);
     _rows[index] = row;
+    if (index > _lastRowIndex) _lastRowIndex = index;
     return row;
   }
 

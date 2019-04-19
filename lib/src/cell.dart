@@ -27,7 +27,11 @@ class Cell {
   List<XmlNode> _remainingChildren;
 
   T value<T>() {
-    if (_value is T) return _value as T;
+    if (_value == null) return null;
+    if (T == String) return _value.toString() as T;
+    else if (T == Object || T == dynamic) return _value;
+    else if (T == double && _value is int) return _value.toDouble();
+    else if (_value is T) return _value as T;
     return null;
   }
 
@@ -88,7 +92,7 @@ class Cell {
       default:
         // Number value.
         var vNode = findChild(node, 'v');
-        _value = vNode != null ? double.parse(vNode.children[0].text) : null;
+        _value = vNode != null ? num.parse(vNode.children[0].text) : null;
         break;
     }
 

@@ -62,4 +62,16 @@ void testValue(Workbook workbook) {
   print(name);
   double money = sheet.cell('E4').value();
   print(money);
+  String date = sheet.cell('F4').value();
+  print(date);
+  int date2 = sheet.cell('F4').value();
+  print(date2);
+  double date3 = sheet.cell('F4').value();
+  print(date3);
+
+  print(sheet.lastRowIndex);
+
+  for (int i = 1; i <= sheet.lastRowIndex; i++) {
+    print(sheet.rowAt(i).cellAt(1).value());
+  }
 }
