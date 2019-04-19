@@ -28,7 +28,7 @@ class Cell {
 
   T value<T>() {
     if (_value == null) return null;
-    if (_value is T) return _value as T;
+    else if (_value is T) return _value;
     else if (T == String) return _value.toString() as T;
     else if (T == double && _value is int) return _value.toDouble();
     else if (T == Object || T == dynamic) return _value;
