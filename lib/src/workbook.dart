@@ -1,5 +1,6 @@
 import 'dart:io' show File;
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 
@@ -36,6 +37,8 @@ class Workbook extends AttachedXmlElement {
 
   Workbook(XmlElement node) : super(node);
 
+  Archive _archive;
+
   factory Workbook.fromFile(String path) {
     var data = File(path).readAsBytesSync();
     return Workbook.fromData(data);
@@ -51,18 +54,23 @@ class Workbook extends AttachedXmlElement {
       return parse(utf8.decode(file.content))?.rootElement;
     }
 
-    var workbook = Workbook(getRoot('xl/workbook.xml')).._init(getRoot);
+    var workbook = Workbook(getRoot('xl/workbook.xml'))
+      .._archive = archive
+      .._init(getRoot);
 
     return workbook;
   }
 
   List<int> toData() {
-    var archiveFiles = <String, List<int>>{};
+    var archiveFiles = <String, ArchiveFile>{};
 
-    List<int> buildXml(XmlNode node) => utf8.encode(
+    void insertArchiveFiles(String path, XmlNode node) {
+      var content = utf8.encode(
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n' +
             node.toXmlString());
-
+      archiveFiles[path] = ArchiveFile(path, content.length, content);
+    }
+    
     _setSheetRefs();
 
     var definedNamesNode = findChild(thisNode, "definedNames");
@@ -95,31 +103,38 @@ class Workbook extends AttachedXmlElement {
           .findById(getAttribute(sheetXmls['id'], 'id')); // 'r:id'
       setAttribute(relationship, 'Target', 'worksheets/sheet${i + 1}.xml');
       _sheetsNode.children.add(sheetXmls['id']);
-      archiveFiles[sheetPath] = buildXml(sheetXmls['sheet']);
+      insertArchiveFiles(sheetPath, sheetXmls['sheet']);
 
       if (sheetXmls['relationships'] != null)
-        archiveFiles[sheetRelsPath] = buildXml(sheetXmls['relationships']);
+        insertArchiveFiles(sheetRelsPath, sheetXmls['relationships']);
     }
 
-    archiveFiles['[Content_Types].xml'] = buildXml(_contentTypes.thisNode);
-    archiveFiles['docProps/app.xml'] = buildXml(_appProperties.thisNode);
-    archiveFiles['docProps/core.xml'] = buildXml(_coreProperties.thisNode);
-    archiveFiles['xl/_rels/workbook.xml.rels'] =
-        buildXml(_relationships.thisNode);
-    archiveFiles['xl/sharedStrings.xml'] = buildXml(_sharedStrings.thisNode);
-    archiveFiles['xl/styles.xml'] = buildXml(_styleSheet.thisNode);
-    archiveFiles['xl/workbook.xml'] = buildXml(thisNode);
+    insertArchiveFiles('[Content_Types].xml', _contentTypes.thisNode);
+    insertArchiveFiles('docProps/app.xml', _appProperties.thisNode);
+    insertArchiveFiles('docProps/core.xml', _coreProperties.thisNode);
+    insertArchiveFiles('xl/_rels/workbook.xml.rels', _relationships.thisNode);
+    insertArchiveFiles('xl/sharedStrings.xml', _sharedStrings.thisNode);
+    insertArchiveFiles('xl/styles.xml', _styleSheet.thisNode);
+    insertArchiveFiles('xl/workbook.xml', thisNode);
 
     return encode(archiveFiles);
   }
 
-  List<int> encode(Map<String, List<int>> archiveFiles) {
-    var archive = Archive();
-    archiveFiles.forEach((path, content) {
-      var file = ArchiveFile(path, content.length, content)..compress = true;
-      archive.addFile(file);
+  List<int> encode(Map<String, ArchiveFile> archiveFiles) {
+    var clone = Archive();
+    _archive.files.forEach((file) {
+      if (file.isFile) {
+        ArchiveFile copy;
+        if (archiveFiles.containsKey(file.name)) {
+          copy = archiveFiles[file.name];
+        } else {
+          var content = (file.content as Uint8List).toList();
+          copy = new ArchiveFile(file.name, content.length, content)..compress = true;
+        }
+        clone.addFile(copy);
+      }
     });
-    return ZipEncoder().encode(archive);
+    return ZipEncoder().encode(clone);
   }
 
   void toFile(String path) {
