@@ -18,6 +18,7 @@ class Sheet extends AttachedXmlElement {
   int _maxSharedFormulaId = -1;
 
   Range _autoFilter;
+  Range get autoFilter => _autoFilter;
 
   Relationships _relationships;
 

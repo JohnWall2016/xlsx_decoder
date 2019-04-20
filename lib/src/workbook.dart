@@ -12,8 +12,28 @@ import './shared_strings.dart';
 import './style_sheet.dart';
 import './xml_utils.dart';
 import './sheet.dart';
+import './nodes.dart';
 
 class Workbook extends AttachedXmlElement {
+  ContentTypes _contentTypes;
+  AppProperties _appProperties;
+  CoreProperties _coreProperties;
+  Relationships _relationships;
+  SharedStrings _sharedStrings;
+  StyleSheet _styleSheet;
+
+  int _maxSheetId;
+  XmlElement _sheetsNode;
+  List<Sheet> _sheets;
+  Sheet _activeSheet;
+
+  ContentTypes get contentTypes => _contentTypes;
+  AppProperties get appProperties => _appProperties;
+  CoreProperties get coreProperties => _coreProperties;
+  Relationships get relationships => _relationships;
+  SharedStrings get sharedStrings => _sharedStrings;
+  StyleSheet get styleSheet => _styleSheet;
+
   Workbook(XmlElement node) : super(node);
 
   factory Workbook.fromFile(String path) {
@@ -36,23 +56,43 @@ class Workbook extends AttachedXmlElement {
     return workbook;
   }
 
-  ContentTypes _contentTypes;
-  AppProperties _appProperties;
-  CoreProperties _coreProperties;
-  Relationships _relationships;
-  SharedStrings _sharedStrings;
-  StyleSheet _styleSheet;
+  List<int> toData() {
+    _setSheetRefs();
+/*
+    var definedNamesNode = findChild(thisNode, "definedNames");
+    for (int i = 0; i < _sheets.length; i++) {
+      var sheet = _sheets[i];
+      if (sheet.autoFilter != null) {
+        if (definedNamesNode == null) {
+          definedNamesNode = Element('definedNames').toXmlNode();
+          insertInOrder(thisNode, definedNamesNode, nodeOrder);
+        }
 
-  int _maxSheetId;
-  XmlElement _sheetsNode;
-  List<Sheet> _sheets;
+        definedNamesNode.children.add(Element('definedName', {
+          'name': '_xlnm._FilterDatabase',
+          'localSheetId': i,
+          'hidden': '1'
+        }));
+      }
+    }
 
-  ContentTypes get contentTypes => _contentTypes;
-  AppProperties get appProperties => _appProperties;
-  CoreProperties get coreProperties => _coreProperties;
-  Relationships get relationships => _relationships;
-  SharedStrings get sharedStrings => _sharedStrings;
-  StyleSheet get styleSheet => _styleSheet;
+        this._sheets.forEach((sheet, i) => {
+            xmlq.appendChild(definedNamesNode, {
+                name: "definedName",
+                attributes: {
+                    name: "_xlnm._FilterDatabase",
+                    localSheetId: i,
+                    hidden: "1"
+                },
+                children: [sheet._autoFilter.address({ includeSheetName: true, anchored: true })]
+            });
+        });
+*/
+  }
+
+  void toFile(String path) {
+
+  }
 
   void _init(XmlElement getRoot(String path)) {
     _maxSheetId = 0;
@@ -86,11 +126,64 @@ class Workbook extends AttachedXmlElement {
 
       _sheets.add(Sheet(this, sheetIdNode, sheetNode, sheetRelationshipsNode));
     }
+
+    _parseSheetRefs();
   }
 
   Sheet sheet(String name) => _sheets.firstWhere((sheet) => sheet.name == name);
 
   Sheet sheetAt(int index) => _sheets[index];
+
+  Map<XmlElement, Sheet> _definedNameNode_localSheet = {};
+
+  void _parseSheetRefs() {
+    var bookViewsNode = findChild(thisNode, 'bookViews');
+    var workbookViewNode = findChild(bookViewsNode, 'workbookView');
+    int activeTabId = getAttribute(workbookViewNode, 'activeTab') ?? 0;
+    _activeSheet = _sheets[activeTabId];
+
+    var definedNamesNode = findChild(thisNode, "definedNames");
+    if (definedNamesNode != null) {
+      definedNamesNode.children.forEach((definedNameNode) {
+        int localSheetId = getAttribute(definedNameNode, 'localSheetId');
+        if (localSheetId != null) {
+          _definedNameNode_localSheet[definedNameNode] = _sheets[localSheetId];
+        }
+      });
+    }
+  }
+
+  void _setSheetRefs() {
+    var bookViewsNode = findChild(thisNode, 'bookViews');
+    if (bookViewsNode == null) {
+      bookViewsNode = Element('bookViews').toXmlNode();
+      insertInOrder(thisNode, bookViewsNode, nodeOrder);
+    }
+
+    var workbookViewNode = findChild(bookViewsNode, 'workbookView');
+    if (workbookViewNode == null) {
+      workbookViewNode = Element('workbookView').toXmlNode();
+      bookViewsNode.children.add(workbookViewNode);
+    }
+
+    setAttribute(workbookViewNode, 'activeTab', _sheets.indexOf(_activeSheet));
+
+    var definedNamesNode = findChild(thisNode, 'definedNames');
+    if (definedNamesNode != null) {
+      definedNamesNode.children.forEach((definedNameNode) {
+        var localSheet = _definedNameNode_localSheet[definedNameNode];
+        if (localSheet != null) {
+          setAttribute(definedNameNode, 'localSheetId', _sheets.indexOf(localSheet));
+        }
+      });
+    }
+  }
+
+  static const nodeOrder = [
+    "fileVersion", "fileSharing", "workbookPr", "workbookProtection", "bookViews", "sheets", "functionGroups",
+    "externalReferences", "definedNames", "calcPr", "oleSize", "customWorkbookViews", "pivotCaches", "smartTagPr",
+    "smartTagTypes", "webPublishing", "fileRecoveryPr", "webPublishObjects", "extLst"
+  ];
 }
 
 /*

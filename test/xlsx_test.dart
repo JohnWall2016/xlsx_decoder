@@ -2,14 +2,17 @@ import 'package:xlsx_decoder/src/relationships.dart';
 import 'package:xlsx_decoder/xlsx_decoder.dart';
 import 'package:xml/xml.dart';
 import 'package:xlsx_decoder/src/xml_utils.dart';
+import 'package:xlsx_decoder/src/address_converter.dart';
 
 void main(List<String> args) {
   //testRelationships();
 
-  var workbook = Workbook.fromFile(args[0]);
+  //var workbook = Workbook.fromFile(args[0]);
   //testSharedString(workbook);
   //testXml();
-  testValue(workbook);
+  //testValue(workbook);
+
+  testAddressConvert();
 }
 
 void testCoreProperties(Workbook workbook) {
@@ -69,10 +72,26 @@ void testValue(Workbook workbook) {
   double date3 = sheet.cell('F4').value();
   print(date3);
   print(sheet.cell('J6').value());
+  print(sheet.cell('X12').value());
 
   print(sheet.lastRowIndex);
 
   for (int i = 1; i <= sheet.lastRowIndex; i++) {
     print(sheet.rowAt(i).cellAt(1).value());
   }
+}
+
+testAddressConvert() {
+  print(columnNameToNumber('AB'));
+  print(columnNumberToName(27));
+  print(CellRef.fromAddress('A1'));
+  print(CellRef.fromAddress('AB27'));
+
+  var cell = CellRef.fromAddress('A1');
+  print(cell.row); print(cell.column); print(cell.toAddress());
+
+  var range = RangeRef.fromAddress('AB27:AC33');
+  print(range); print(range.toAddress());
+  range = RangeRef.fromAddress(r'$AB27:$AC33');
+  print(range); print(range.toAddress());
 }

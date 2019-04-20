@@ -12,8 +12,10 @@ class Cell {
   Sheet get sheet => _row?.sheet;
   Workbook get workbook => _row?.workbook;
 
-  int _column;
-  int get column => _column;
+  int get rowIndex => _row?.index;
+
+  int _columnIndex;
+  int get columnIndex => _columnIndex;
   int _styleId;
   dynamic _value;
   List<XmlAttribute> _remainingAttributes = [];
@@ -39,7 +41,7 @@ class Cell {
     _parseNode(node);
   }
 
-  Cell.create(this._row, this._column, [this._styleId]);
+  Cell.create(this._row, this._columnIndex, [this._styleId]);
 
   void _parseNode(XmlElement node) {
     String type;
@@ -47,7 +49,7 @@ class Cell {
       switch (attr.name.local) {
         case 'r':
           var ref = CellRef.fromAddress(attr.value);
-          _column = ref.column;
+          _columnIndex = ref.column;
           break;
         case 's':
           _styleId = int.parse(attr.value);

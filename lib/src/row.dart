@@ -15,7 +15,7 @@ class Row extends AttachedXmlElement {
   Row(this._sheet, XmlElement node) : super(node) {
     elements.forEach((cellNode) {
       var cell = Cell(this, cellNode);
-      _cells[cell.column] = cell;
+      _cells[cell.columnIndex] = cell;
     });
   }
 
