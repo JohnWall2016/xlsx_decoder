@@ -65,6 +65,9 @@ class Sheet extends AttachedXmlElement {
     removeChild(thisNode, 'dimension');
 
     _sheetDataNode = findChild(thisNode, 'sheetData');
+    if (_sheetDataNode != null) {
+      removeChild(thisNode, _sheetDataNode);
+    }
     _sheetDataNode.children.forEach((rowNode) {
       var row = Row(this, rowNode);
       var index = row.index;
@@ -173,9 +176,9 @@ class Sheet extends AttachedXmlElement {
     var node = thisNode.copy();
 
     var colNodes = <XmlElement>[];
-    for (var i = 0; i < _colNodes.length; i++) {
+    for (var i = 1; i <= _colNodes.length; i++) {
       var colNode = _colNodes[i];
-      if (i == getAttribute(colNode, 'min') && colNode.attributes.length > 2) {
+      if (i == getAttribute<int>(colNode, 'min') && colNode.attributes.length > 2) {
         colNodes.add(colNode);
       }
     }
@@ -191,6 +194,9 @@ class Sheet extends AttachedXmlElement {
     rowIndexes.forEach((index) {
       _sheetDataNode.children.add(_rows[index].toXml());
     });
+    if (_sheetDataNode.children.length > 0) {
+      insertInOrder(node, _sheetDataNode, nodeOrder);
+    }
 
     _hyperlinksNode.children.clear();
     _hyperlinksNode.children.addAll(_hyperlinks.values);
@@ -198,7 +204,6 @@ class Sheet extends AttachedXmlElement {
       insertInOrder(node, _hyperlinksNode, nodeOrder);
     }
 
-    _mergeCellsNode.detachParent(_mergeCellsNode.parent);
     _mergeCellsNode.children.clear();
     _mergeCellsNode.children.addAll(_mergeCells.values);
     if (_mergeCellsNode.children.length > 0) {

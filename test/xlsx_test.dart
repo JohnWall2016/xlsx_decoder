@@ -16,10 +16,10 @@ void main(List<String> args) {
 }
 
 void testToXml(Workbook workbook) {
-  /*var sheet = workbook.sheetAt(0);
-  print(sheet.cell('A1').toXml());
-  print(sheet.rowAt(1).toXml());
-  print(sheet.toXmls()['sheet']);*/
+  var sheet = workbook.sheetAt(0);
+  //print(sheet.cell('A1').toXml());
+  //print(sheet.rowAt(1).toXml());
+  //print(sheet.toXmls()['sheet']);
 
   workbook.toFile('/Users/wangjiong/Downloads/aaa.xlsx');
 }
