@@ -25,6 +25,8 @@ class Sheet extends AttachedXmlElement {
   int _lastRowIndex = -1;
   int get lastRowIndex => _lastRowIndex;
 
+  XmlElement _sheetDataNode;
+
   Map<int, Row> _rows = {};
   List<Column> _columns = [];
 
@@ -62,8 +64,8 @@ class Sheet extends AttachedXmlElement {
 
     removeChild(thisNode, 'dimension');
 
-    var sheetDataNode = findChild(thisNode, 'sheetData');
-    sheetDataNode.children.forEach((rowNode) {
+    _sheetDataNode = findChild(thisNode, 'sheetData');
+    _sheetDataNode.children.forEach((rowNode) {
       var row = Row(this, rowNode);
       var index = row.index;
       if (index > _lastRowIndex) _lastRowIndex = index;
@@ -165,6 +167,62 @@ class Sheet extends AttachedXmlElement {
     if (sharedFormulaId > _maxSharedFormulaId) {
       _maxSharedFormulaId = sharedFormulaId;
     }
+  }
+
+  toXmls() {
+    var node = thisNode.copy();
+
+    var colNodes = <XmlElement>[];
+    for (var i = 0; i < _colNodes.length; i++) {
+      var colNode = _colNodes[i];
+      if (i == getAttribute(colNode, 'min') && colNode.attributes.length > 2) {
+        colNodes.add(colNode);
+      }
+    }
+    _colsNode.children
+      ..clear()
+      ..addAll(colNodes);
+    if (_colsNode.children.length > 0) {
+      insertInOrder(node, _colsNode, nodeOrder);
+    }
+
+    _sheetDataNode.children.clear();
+    var rowIndexes = _rows.keys.toList()..sort();
+    rowIndexes.forEach((index) {
+      _sheetDataNode.children.add(_rows[index].toXml());
+    });
+
+    _hyperlinksNode.children.clear();
+    _hyperlinksNode.children.addAll(_hyperlinks.values);
+    if (_hyperlinksNode.children.length > 0) {
+      insertInOrder(node, _hyperlinksNode, nodeOrder);
+    }
+
+    _mergeCellsNode.detachParent(_mergeCellsNode.parent);
+    _mergeCellsNode.children.clear();
+    _mergeCellsNode.children.addAll(_mergeCells.values);
+    if (_mergeCellsNode.children.length > 0) {
+      insertInOrder(node, _mergeCellsNode, nodeOrder);
+    }
+
+    _dataValidationsNode.children.clear();
+    _dataValidationsNode.children.addAll(_dataValidations.values);
+    if (_dataValidationsNode.children.length > 0) {
+      insertInOrder(node, _dataValidationsNode, nodeOrder);
+    }
+
+    if (_autoFilter != null) {
+      insertInOrder(
+          node,
+          Element('autoFilter', {'ref': _autoFilter.address()}).toXmlNode(),
+          nodeOrder);
+    }
+
+    return {
+      'id': _idNode,
+      'sheet': node,
+      'relationships': _relationships.thisNode
+    };
   }
 
   static const nodeOrder = [

@@ -5,6 +5,7 @@ import './xml_utils.dart';
 import './workbook.dart';
 import './formula_error.dart';
 import './sheet.dart';
+import './nodes.dart';
 
 class Cell {
   Row _row;
@@ -17,7 +18,10 @@ class Cell {
   int _columnIndex;
   int get columnIndex => _columnIndex;
   int _styleId;
+
+  String _type;
   dynamic _value;
+
   List<XmlAttribute> _remainingAttributes = [];
 
   String _formulaType;
@@ -29,10 +33,14 @@ class Cell {
   List<XmlNode> _remainingChildren;
 
   T value<T>() {
-    if (_value == null) return null;
-    else if (_value is T) return _value;
-    else if (T == String) return _value.toString() as T;
-    else if (T == double && _value is int) return _value.toDouble();
+    if (_value == null)
+      return null;
+    else if (_value is T)
+      return _value;
+    else if (T == String)
+      return _value.toString() as T;
+    else if (T == double && _value is int)
+      return _value.toDouble();
     else if (T == Object || T == dynamic) return _value;
     return null;
   }
@@ -63,6 +71,7 @@ class Cell {
     });
 
     // Parse the value.
+    _type = type;
     switch (type) {
       case 's':
         // String value.
@@ -128,5 +137,61 @@ class Cell {
     removeChild(node, 'is');
 
     _remainingChildren = node.children;
+  }
+
+  String address() => CellRef(rowIndex, columnIndex).toAddress();
+
+  XmlElement toXml() {
+    var node = Element('c').toXmlNode()
+      ..attributes.addAll(_remainingAttributes ?? []);
+
+    setAttribute(node, 'r', address());
+
+    if (_formulaType != null) {
+      var fNode = Element('f').toXmlNode()
+        ..attributes.addAll(_remainingFormulaAttributes ?? []);
+
+      if (_formulaType != null && _formulaType != 'normal') {
+        setAttribute(fNode, 't', _formulaType);
+      }
+      if (_formulaRef != null) {
+        setAttribute(fNode, 'ref', _formulaRef);
+      }
+      if (_sharedFormulaId != null) {
+        setAttribute(fNode, 'si', _sharedFormulaId);
+      }
+      if (_formula != null) {
+        fNode.children.add(Text(_formula).toXmlNode());
+      }
+      node.children.add(fNode);
+    } else if (_value != null) {
+      String type, text;
+      if (_type == 's' || _value is String || _value is List) {
+        // TODO(wj): Rich text is array for now
+        type = 's';
+        text = workbook.sharedStrings.getIndexForString(_value).toString();
+      } else if (_value is bool) {
+        type = 'b';
+        text = _value ? '1' : '0';
+      } else if (_value is num) {
+        type = '';
+        text = _value.toString();
+      }
+      if (type != null) {
+        if (type.isNotEmpty) setAttribute(node, 't', type);
+        node.children.add(
+            Element('v').toXmlNode()..children.add(Text(text).toXmlNode()));
+      }
+    }
+
+    if (_styleId != null) {
+      setAttribute(node, 's', _styleId);
+    }
+
+    if (_remainingChildren != null) {
+      node.children.addAll(_remainingChildren);
+    }
+
+    return node;
   }
 }

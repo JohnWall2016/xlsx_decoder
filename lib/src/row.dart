@@ -42,4 +42,13 @@ class Row extends AttachedXmlElement {
     int index = columnNameToNumber(columnName);
     return cellAt(index);
   }
+
+  XmlElement toXml() {
+    thisNode.children.clear();
+    var cellIndexes = _cells.keys.toList()..sort();
+    cellIndexes.forEach((index) {
+      thisNode.children.add(_cells[index].toXml());
+    });
+    return thisNode;
+  }
 }

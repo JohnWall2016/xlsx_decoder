@@ -6,13 +6,22 @@ import 'package:xlsx_decoder/src/address_converter.dart';
 
 void main(List<String> args) {
   //testRelationships();
+  //testAddressConvert();
 
-  //var workbook = Workbook.fromFile(args[0]);
+  var workbook = Workbook.fromFile(args[0]);
   //testSharedString(workbook);
   //testXml();
   //testValue(workbook);
+  testToXml(workbook);
+}
 
-  testAddressConvert();
+void testToXml(Workbook workbook) {
+  /*var sheet = workbook.sheetAt(0);
+  print(sheet.cell('A1').toXml());
+  print(sheet.rowAt(1).toXml());
+  print(sheet.toXmls()['sheet']);*/
+
+  workbook.toFile('/Users/wangjiong/Downloads/aaa.xlsx');
 }
 
 void testCoreProperties(Workbook workbook) {

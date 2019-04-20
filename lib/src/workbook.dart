@@ -57,8 +57,14 @@ class Workbook extends AttachedXmlElement {
   }
 
   List<int> toData() {
+    var archiveFiles = <String, List<int>>{};
+
+    List<int> buildXml(XmlNode node) => utf8.encode(
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n' +
+            node.toXmlString());
+
     _setSheetRefs();
-/*
+
     var definedNamesNode = findChild(thisNode, "definedNames");
     for (int i = 0; i < _sheets.length; i++) {
       var sheet = _sheets[i];
@@ -68,30 +74,58 @@ class Workbook extends AttachedXmlElement {
           insertInOrder(thisNode, definedNamesNode, nodeOrder);
         }
 
-        definedNamesNode.children.add(Element('definedName', {
+        definedNamesNode.children.add((Element('definedName', {
           'name': '_xlnm._FilterDatabase',
           'localSheetId': i,
           'hidden': '1'
-        }));
+        })
+              ..children.add(Text(sheet.autoFilter
+                  .address(includeSheetName: true, anchored: true))))
+            .toXmlNode());
       }
     }
 
-        this._sheets.forEach((sheet, i) => {
-            xmlq.appendChild(definedNamesNode, {
-                name: "definedName",
-                attributes: {
-                    name: "_xlnm._FilterDatabase",
-                    localSheetId: i,
-                    hidden: "1"
-                },
-                children: [sheet._autoFilter.address({ includeSheetName: true, anchored: true })]
-            });
-        });
-*/
+    _sheetsNode.children.clear();
+    for (var i = 0; i < _sheets.length; i++) {
+      var sheet = _sheets[i];
+      var sheetPath = 'xl/worksheets/sheet${i + 1}.xml';
+      var sheetRelsPath = 'xl/worksheets/_rels/sheet${i + 1}.xml.rels';
+      var sheetXmls = sheet.toXmls();
+      var relationship = _relationships
+          .findById(getAttribute(sheetXmls['id'], 'id')); // 'r:id'
+      setAttribute(relationship, 'Target', 'worksheets/sheet${i + 1}.xml');
+      _sheetsNode.children.add(sheetXmls['id']);
+      archiveFiles[sheetPath] = buildXml(sheetXmls['sheet']);
+
+      if (sheetXmls['relationships'] != null)
+        archiveFiles[sheetRelsPath] = buildXml(sheetXmls['relationships']);
+    }
+
+    archiveFiles['[Content_Types].xml'] = buildXml(_contentTypes.thisNode);
+    archiveFiles['docProps/app.xml'] = buildXml(_appProperties.thisNode);
+    archiveFiles['docProps/core.xml'] = buildXml(_coreProperties.thisNode);
+    archiveFiles['xl/_rels/workbook.xml.rels'] =
+        buildXml(_relationships.thisNode);
+    archiveFiles['xl/sharedStrings.xml'] = buildXml(_sharedStrings.thisNode);
+    archiveFiles['xl/styles.xml'] = buildXml(_styleSheet.thisNode);
+    archiveFiles['xl/workbook.xml'] = buildXml(thisNode);
+
+    return encode(archiveFiles);
+  }
+
+  List<int> encode(Map<String, List<int>> archiveFiles) {
+    var archive = Archive();
+    archiveFiles.forEach((path, content) {
+      var file = ArchiveFile(path, content.length, content)..compress = true;
+      archive.addFile(file);
+    });
+    return ZipEncoder().encode(archive);
   }
 
   void toFile(String path) {
-
+    File(path)
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(toData());
   }
 
   void _init(XmlElement getRoot(String path)) {
@@ -173,16 +207,33 @@ class Workbook extends AttachedXmlElement {
       definedNamesNode.children.forEach((definedNameNode) {
         var localSheet = _definedNameNode_localSheet[definedNameNode];
         if (localSheet != null) {
-          setAttribute(definedNameNode, 'localSheetId', _sheets.indexOf(localSheet));
+          setAttribute(
+              definedNameNode, 'localSheetId', _sheets.indexOf(localSheet));
         }
       });
     }
   }
 
   static const nodeOrder = [
-    "fileVersion", "fileSharing", "workbookPr", "workbookProtection", "bookViews", "sheets", "functionGroups",
-    "externalReferences", "definedNames", "calcPr", "oleSize", "customWorkbookViews", "pivotCaches", "smartTagPr",
-    "smartTagTypes", "webPublishing", "fileRecoveryPr", "webPublishObjects", "extLst"
+    "fileVersion",
+    "fileSharing",
+    "workbookPr",
+    "workbookProtection",
+    "bookViews",
+    "sheets",
+    "functionGroups",
+    "externalReferences",
+    "definedNames",
+    "calcPr",
+    "oleSize",
+    "customWorkbookViews",
+    "pivotCaches",
+    "smartTagPr",
+    "smartTagTypes",
+    "webPublishing",
+    "fileRecoveryPr",
+    "webPublishObjects",
+    "extLst"
   ];
 }
 
