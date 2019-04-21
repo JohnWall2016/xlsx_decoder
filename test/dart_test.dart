@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 void main(List<String> args) {
   /*var address = r'$A$1';
   var match = RegExp(r'(\$?)([A-Z]+)(\$?)(\d+)').firstMatch(address);
@@ -12,11 +14,29 @@ void main(List<String> args) {
   /*var s = 'aaa';
   print('$s');*/
 
-  const _cellRegex = r'(\$?)([A-Z]+)(\$?)(\d+)';
+  /*const _cellRegex = r'(\$?)([A-Z]+)(\$?)(\d+)';
   const _rangeRegex = '($_cellRegex):($_cellRegex)';
 
   var address = 'A1:B2';
   var match = RegExp(_rangeRegex).firstMatch(address);
   print(match.group(1));
-  print(match.group(6));
+  print(match.group(6));*/
+  //LinkedList
+  //int
+  //SplayTreeMap
+
+  /*
+  num i = 1.1;
+  int j = i as int;
+  print(j);
+  */
+
+  var map = SplayTreeMap();
+  map[2] = 'two';
+  map[1] = 'one';
+  map[100] = 'one hundred';
+  map[50] = 'fifty';
+
+  map.keys.forEach((k) => print(k));
+  map.values.forEach((v) => print(v));
 }

@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import './workbook.dart';
 import './attached_xml_element.dart';
 import './nodes.dart';
@@ -27,7 +29,7 @@ class Sheet extends AttachedXmlElement {
 
   XmlElement _sheetDataNode;
 
-  Map<int, Row> _rows = {};
+  SplayTreeMap<int, Row> _rows = SplayTreeMap();
   List<Column> _columns = [];
 
   XmlElement _colsNode;
@@ -235,12 +237,6 @@ rowNode = rowNode || {
 
     _sheetDataNode.children.clear();
     var sheetDataNode = _sheetDataNode.copy();
-    /*
-    var rowIndexes = _rows.keys.toList()..sort();
-    rowIndexes.forEach((index) {
-      sheetDataNode.children.add(_rows[index].toXml());
-    });
-    */
     sheetDataNode.children.addAll(_rows.values.map((r) => r.toXml()));
     if (sheetDataNode.children.length > 0) {
       insertInOrder(node, sheetDataNode, nodeOrder);

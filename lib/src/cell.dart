@@ -193,7 +193,7 @@ class Cell {
     }
 
     if (_remainingChildren != null) {
-      node.children.addAll(_remainingChildren);
+      node.children.addAll(_remainingChildren.map((c) => c.copy()));
     }
 
     return node;

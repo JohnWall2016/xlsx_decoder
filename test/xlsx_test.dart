@@ -21,7 +21,7 @@ void testToXml(Workbook workbook) {
   print(sheet.rowAt(1).toXml());
   print(sheet.toXmls()['sheet']);
 
-  sheet.cell('A1').setValue('刘德华的演唱会');
+  sheet.cell('A1').setValue('刘德华的演唱会2');
 
   workbook.toFile('/Users/wangjiong/Downloads/aaa.xlsx');
 }

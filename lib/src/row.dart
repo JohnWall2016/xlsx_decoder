@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import './attached_xml_element.dart';
 import './sheet.dart';
 import './workbook.dart';
@@ -10,7 +12,7 @@ class Row extends AttachedXmlElement {
   Sheet get sheet => _sheet;
   Workbook get workbook => _sheet?.workbook;
 
-  Map<int, Cell> _cells = {};
+  SplayTreeMap<int, Cell> _cells = SplayTreeMap();
 
   Row(this._sheet, XmlElement node) : super(node) {
     elements.forEach((cellNode) {
@@ -47,12 +49,6 @@ class Row extends AttachedXmlElement {
   XmlElement toXml() {
     thisNode.children.clear();
     var node = thisNode.copy();
-    /*
-    var cellIndexes = _cells.keys.toList()..sort();
-    cellIndexes.forEach((index) {
-      thisNode.children.add(_cells[index].toXml());
-    });
-    */
     node.children.addAll(_cells.values.map((c) => c.toXml()));
     return node;
   }
