@@ -74,6 +74,7 @@ class Sheet extends AttachedXmlElement {
       if (index > _lastRowIndex) _lastRowIndex = index;
       _rows[index] = row;
     });
+    _sheetDataNode.children.clear();
 
     _colsNode = findChild(thisNode, 'cols');
     if (_colsNode != null) {
@@ -89,6 +90,7 @@ class Sheet extends AttachedXmlElement {
         _colNodes[i] = colNode;
       }
     });
+    _colsNode.children.clear();
 
     _sheetPrNode = findChild(thisNode, 'sheetPr');
     if (_sheetPrNode == null) {
@@ -172,48 +174,98 @@ class Sheet extends AttachedXmlElement {
     }
   }
 
+  void insertRow(int index, [XmlElement rowNode]) {
+    rowNode ??= Element('row', { 'r': index }).toXmlNode();
+    var row = Row(this, rowNode);
+/*
+rowNode = rowNode || {
+            name: 'row',
+            attributes: {
+                r: rowNumber
+            },
+            children: []
+        };
+        const row = new Row(this, rowNode);
+        this._rows.splice(rowNumber, 0, row);
+        this._rows.forEach((row, index) => {
+            if (index > rowNumber && row._node.attributes)
+                row._node.attributes.r = index;
+        });
+
+        let mergeCell = {};
+        for (let ref of Object.keys(this._mergeCells)) {
+            let k = ref;
+            let v = this._mergeCells[k];
+            let m = ref.match(/([A-Za-z]+)([0-9]+):([A-Za-z]+)([0-9]+)/);
+            if (m) {
+                let [, c1, r1, c2, r2] = m;
+                if (r1 >= rowNumber || r2 >= rowNumber) {
+                    if (r1 >= rowNumber) r1 ++;
+                    if (r2 >= rowNumber) r2 ++;
+                    k = `${c1}${r1}:${c2}${r2}`;
+                    v.attributes.ref = k;
+                }
+            }
+            mergeCell[k] = v;
+        }
+        this._mergeCells = mergeCell;
+
+        return row;
+*/
+  }
+
   toXmls() {
     var node = thisNode.copy();
 
     var colNodes = <XmlElement>[];
     for (var i = 1; i <= _colNodes.length; i++) {
       var colNode = _colNodes[i];
-      if (i == getAttribute<int>(colNode, 'min') && colNode.attributes.length > 2) {
-        colNodes.add(colNode);
+      if (i == getAttribute<int>(colNode, 'min') &&
+          colNode.attributes.length > 2) {
+        colNodes.add(colNode.copy());
       }
     }
-    _colsNode.children
-      ..clear()
-      ..addAll(colNodes);
-    if (_colsNode.children.length > 0) {
-      insertInOrder(node, _colsNode, nodeOrder);
+
+    _colsNode.children.clear();
+    var colsNode = _colsNode.copy();
+    colsNode.children.addAll(colNodes);
+    if (colsNode.children.length > 0) {
+      insertInOrder(node, colsNode, nodeOrder);
     }
 
     _sheetDataNode.children.clear();
+    var sheetDataNode = _sheetDataNode.copy();
+    /*
     var rowIndexes = _rows.keys.toList()..sort();
     rowIndexes.forEach((index) {
-      _sheetDataNode.children.add(_rows[index].toXml());
+      sheetDataNode.children.add(_rows[index].toXml());
     });
-    if (_sheetDataNode.children.length > 0) {
-      insertInOrder(node, _sheetDataNode, nodeOrder);
+    */
+    sheetDataNode.children.addAll(_rows.values.map((r) => r.toXml()));
+    if (sheetDataNode.children.length > 0) {
+      insertInOrder(node, sheetDataNode, nodeOrder);
     }
 
     _hyperlinksNode.children.clear();
-    _hyperlinksNode.children.addAll(_hyperlinks.values);
-    if (_hyperlinksNode.children.length > 0) {
-      insertInOrder(node, _hyperlinksNode, nodeOrder);
+    var hyperlinksNode = _hyperlinksNode.copy();
+    hyperlinksNode.children.addAll(_hyperlinks.values.map((h) => h.copy()));
+    if (hyperlinksNode.children.length > 0) {
+      insertInOrder(node, hyperlinksNode, nodeOrder);
     }
 
     _mergeCellsNode.children.clear();
-    _mergeCellsNode.children.addAll(_mergeCells.values);
-    if (_mergeCellsNode.children.length > 0) {
-      insertInOrder(node, _mergeCellsNode, nodeOrder);
+    var mergeCellsNode = _mergeCellsNode.copy();
+    mergeCellsNode.children.addAll(_mergeCells.values.map((m) => m.copy()));
+    if (mergeCellsNode.children.length > 0) {
+      insertInOrder(node, mergeCellsNode, nodeOrder);
     }
 
     _dataValidationsNode.children.clear();
-    _dataValidationsNode.children.addAll(_dataValidations.values);
-    if (_dataValidationsNode.children.length > 0) {
-      insertInOrder(node, _dataValidationsNode, nodeOrder);
+    var dataValidationsNode = _dataValidationsNode.copy();
+    dataValidationsNode.children
+        .addAll(_dataValidations.values.map((d) => d.copy()));
+    if (dataValidationsNode.children.length > 0) {
+      insertInOrder(node, dataValidationsNode, nodeOrder);
     }
 
     if (_autoFilter != null) {

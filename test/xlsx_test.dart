@@ -17,9 +17,11 @@ void main(List<String> args) {
 
 void testToXml(Workbook workbook) {
   var sheet = workbook.sheetAt(0);
-  //print(sheet.cell('A1').toXml());
-  //print(sheet.rowAt(1).toXml());
-  //print(sheet.toXmls()['sheet']);
+  print(sheet.cell('A1').toXml());
+  print(sheet.rowAt(1).toXml());
+  print(sheet.toXmls()['sheet']);
+
+  sheet.cell('A1').setValue('刘德华的演唱会');
 
   workbook.toFile('/Users/wangjiong/Downloads/aaa.xlsx');
 }

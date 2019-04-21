@@ -22,6 +22,10 @@ class Cell {
   String _type;
   dynamic _value;
 
+  void setValue<T>(T value) {
+    _value = value;
+  }
+
   List<XmlAttribute> _remainingAttributes = [];
 
   String _formulaType;

@@ -11,7 +11,7 @@ class Row extends AttachedXmlElement {
   Workbook get workbook => _sheet?.workbook;
 
   Map<int, Cell> _cells = {};
-  
+
   Row(this._sheet, XmlElement node) : super(node) {
     elements.forEach((cellNode) {
       var cell = Cell(this, cellNode);
@@ -29,7 +29,8 @@ class Row extends AttachedXmlElement {
     int rowStyleId = getAttribute(thisNode, 's');
     int columnStyleId = sheet.existingColumnStyleId(index);
 
-    if (rowStyleId != null) styleId = rowStyleId;
+    if (rowStyleId != null)
+      styleId = rowStyleId;
     else if (columnStyleId != null) styleId = columnStyleId;
 
     cell = Cell.create(this, index, styleId);
@@ -45,10 +46,14 @@ class Row extends AttachedXmlElement {
 
   XmlElement toXml() {
     thisNode.children.clear();
+    var node = thisNode.copy();
+    /*
     var cellIndexes = _cells.keys.toList()..sort();
     cellIndexes.forEach((index) {
       thisNode.children.add(_cells[index].toXml());
     });
-    return thisNode;
+    */
+    node.children.addAll(_cells.values.map((c) => c.toXml()));
+    return node;
   }
 }

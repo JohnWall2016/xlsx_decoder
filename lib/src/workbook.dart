@@ -138,9 +138,10 @@ class Workbook extends AttachedXmlElement {
   }
 
   void toFile(String path) {
-    File(path)
-      ..createSync(recursive: true)
-      ..writeAsBytesSync(toData());
+    var file = File(path);
+    if (!file.existsSync())
+      file.createSync(recursive: true);
+    file.writeAsBytesSync(toData());
   }
 
   void _init(XmlElement getRoot(String path)) {

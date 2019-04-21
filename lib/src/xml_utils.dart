@@ -109,7 +109,6 @@ void removeChild(XmlElement node, dynamic nameOrNode) {
         (node) => node is XmlElement && node.name.local == nameOrNode);
   } else if (nameOrNode is XmlNode) {
     node.children.remove(nameOrNode);
-    nameOrNode.detachParent(nameOrNode.parent);
   }
 }
 
@@ -120,7 +119,6 @@ void insertInOrder(XmlElement node, XmlElement child, List<String> nodeOrder) {
       var name = nodeOrder[i];
       var siblingIndex = findChildIndex(node, name);
       if (siblingIndex >= 0) {
-        child.detachParent(child.parent);
         node.children.insert(siblingIndex, child);
         return;
       }
