@@ -1,4 +1,4 @@
-import 'dart:collection';
+import 'package:xlsx_decoder/src/splay_tree.dart';
 
 void main(List<String> args) {
   /*var address = r'$A$1';
@@ -39,4 +39,10 @@ void main(List<String> args) {
 
   map.keys.forEach((k) => print(k));
   map.values.forEach((v) => print(v));
+  map.nodesFrom(1, (node) {
+    node.key += 1;
+    node.value += 'new';
+  });
+  map[1] = 'one';
+  map.entries.forEach((e) => print(e));
 }

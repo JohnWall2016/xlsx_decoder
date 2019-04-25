@@ -22,8 +22,9 @@ void testToXml(Workbook workbook) {
   print(sheet.toXmls()['sheet']);
 
   sheet.cell('A1').setValue('刘德华的演唱会2');
+  sheet.insertRow(3);
 
-  workbook.toFile('/Users/wangjiong/Downloads/aaa.xlsx');
+  workbook.toFile('e:/aaa.xlsx');
 }
 
 void testCoreProperties(Workbook workbook) {

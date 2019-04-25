@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import './workbook.dart';
 import './attached_xml_element.dart';
 import './nodes.dart';
@@ -10,6 +8,7 @@ import './row.dart';
 import './column.dart';
 import './cell.dart';
 import './address_converter.dart';
+import './splay_tree.dart';
 
 class Sheet extends AttachedXmlElement {
   Workbook _workbook;
@@ -38,7 +37,7 @@ class Sheet extends AttachedXmlElement {
   XmlElement _sheetPrNode;
 
   XmlElement _mergeCellsNode;
-  Map<String, XmlElement> _mergeCells = {};
+  Map<RangeRef, XmlElement> _mergeCells = {};
 
   XmlElement _dataValidationsNode;
   Map<String, XmlElement> _dataValidations = {};
@@ -108,7 +107,7 @@ class Sheet extends AttachedXmlElement {
     }
 
     _mergeCellsNode.children.whereType<XmlElement>().forEach((mergeCellNode) {
-      _mergeCells[getAttribute(mergeCellNode, 'ref')] = mergeCellNode;
+      _mergeCells[RangeRef.fromAddress(getAttribute(mergeCellNode, 'ref'))] = mergeCellNode;
     });
     _mergeCellsNode.children.clear();
 
@@ -176,44 +175,24 @@ class Sheet extends AttachedXmlElement {
     }
   }
 
-  void insertRow(int index, [XmlElement rowNode]) {
+  Row insertRow(int index, [XmlElement rowNode]) {
     rowNode ??= Element('row', { 'r': index }).toXmlNode();
     var row = Row(this, rowNode);
-/*
-rowNode = rowNode || {
-            name: 'row',
-            attributes: {
-                r: rowNumber
-            },
-            children: []
-        };
-        const row = new Row(this, rowNode);
-        this._rows.splice(rowNumber, 0, row);
-        this._rows.forEach((row, index) => {
-            if (index > rowNumber && row._node.attributes)
-                row._node.attributes.r = index;
-        });
+    _rows.nodesFrom(index, (node) {
+      var r = node.key + 1;
+      node.key = r;
+      setAttribute(node.value.thisNode, 'r', r);
+    });
+    _rows[index] = row;
 
-        let mergeCell = {};
-        for (let ref of Object.keys(this._mergeCells)) {
-            let k = ref;
-            let v = this._mergeCells[k];
-            let m = ref.match(/([A-Za-z]+)([0-9]+):([A-Za-z]+)([0-9]+)/);
-            if (m) {
-                let [, c1, r1, c2, r2] = m;
-                if (r1 >= rowNumber || r2 >= rowNumber) {
-                    if (r1 >= rowNumber) r1 ++;
-                    if (r2 >= rowNumber) r2 ++;
-                    k = `${c1}${r1}:${c2}${r2}`;
-                    v.attributes.ref = k;
-                }
-            }
-            mergeCell[k] = v;
-        }
-        this._mergeCells = mergeCell;
-
-        return row;
-*/
+    _mergeCells.forEach((ref, node) {
+      if (index <= ref.start.row || index <= ref.end.row) {
+        if (index <= ref.start.row) ref.start.row ++;
+        if (index <= ref.end.row) ref.end.row ++;
+        setAttribute(node, 'ref', ref.toAddress());
+      }
+    });
+    return row;
   }
 
   toXmls() {

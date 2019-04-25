@@ -4,6 +4,7 @@ const _rangeRegex = '($_cellRegex):($_cellRegex)';
 class CellRef {
   int _row;
   int get row => _row;
+  void set row(int r) => _row = r;
 
   bool _rowAnchored;
 
