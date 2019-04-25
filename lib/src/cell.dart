@@ -145,7 +145,7 @@ class Cell {
 
   String address() => CellRef(rowIndex, columnIndex).toAddress();
 
-  XmlElement toXml() {
+  XmlElement toXml([bool clearValue = false]) {
     var node = Element('c').toXmlNode()
       ..attributes.addAll(_remainingAttributes ?? []);
 
@@ -168,7 +168,7 @@ class Cell {
         fNode.children.add(Text(_formula).toXmlNode());
       }
       node.children.add(fNode);
-    } else if (_value != null) {
+    } else if (!clearValue && _value != null) {
       String type, text;
       if (_type == 's' || _value is String || _value is List) {
         // TODO(wj): Rich text is array for now

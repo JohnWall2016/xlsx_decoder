@@ -46,10 +46,11 @@ class Row extends AttachedXmlElement {
     return cellAt(index);
   }
 
-  XmlElement toXml() {
+  XmlElement toXml({int rowIndex, bool clearValue = false}) {
     thisNode.children.clear();
     var node = thisNode.copy();
-    node.children.addAll(_cells.values.map((c) => c.toXml()));
+    if (rowIndex != null) setAttribute(node, 'r', rowIndex);
+    node.children.addAll(_cells.values.map((c) => c.toXml(clearValue)));
     return node;
   }
 }

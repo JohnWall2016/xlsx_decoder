@@ -22,8 +22,10 @@ void testToXml(Workbook workbook) {
   print(sheet.toXmls()['sheet']);
 
   sheet.cell('A1').setValue('刘德华的演唱会2');
-  sheet.insertRow(3);
-
+  //sheet.insertRow(3);
+  sheet.insertRowCopyFrom(5, 4);
+  sheet.rowAt(4).cell('B').setValue('刘德华1');
+  sheet.rowAt(5).cell('B').setValue('刘德华2');
   workbook.toFile('e:/aaa.xlsx');
 }
 
