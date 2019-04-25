@@ -1,7 +1,4 @@
-A library for Dart developers.
-
-Created from templates made available by Stagehand under a BSD-style
-[license](https://github.com/dart-lang/stagehand/blob/master/LICENSE).
+A library for reading and writing a xlsx file.
 
 ## Usage
 
@@ -11,12 +8,21 @@ A simple usage example:
 import 'package:xlsx_decoder/xlsx_decoder.dart';
 
 main() {
-  var awesome = new Awesome();
+  // load a xlsx file.
+  var workbook = Workbook.fromFile('a.xlsx');
+  var sheet = workbook.sheetAt(0);
+  
+  // read a cell's value.
+  String s = sheet.cell('A1').value();
+  print(s);
+  int i = sheet.rowAt(2).cell('B').value(); // B2
+  print(i);
+
+  // write a cell's value.
+  sheet.cell('A1').setValue('a string');
+  sheet.rowAt(2).cell('B').setValue(100);
+  
+  // save to another xlsx file.
+  workbook.toFile('b.xlsx');
 }
 ```
-
-## Features and bugs
-
-Please file feature requests and bugs at the [issue tracker][tracker].
-
-[tracker]: http://example.com/issues/replaceme
