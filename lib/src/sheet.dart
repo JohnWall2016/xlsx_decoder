@@ -207,13 +207,13 @@ class Sheet extends AttachedXmlElement {
     var node = thisNode.copy();
 
     var colNodes = <XmlElement>[];
-    for (var i = 1; i <= _colNodes.length; i++) {
+    _colNodes.keys.forEach((i) {
       var colNode = _colNodes[i];
       if (i == getAttribute<int>(colNode, 'min') &&
           colNode.attributes.length > 2) {
         colNodes.add(colNode.copy());
       }
-    }
+    });
 
     _colsNode.children.clear();
     var colsNode = _colsNode.copy();

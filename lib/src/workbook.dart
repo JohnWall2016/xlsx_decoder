@@ -139,8 +139,9 @@ class Workbook extends AttachedXmlElement {
 
   void toFile(String path) {
     var file = File(path);
-    if (!file.existsSync())
-      file.createSync(recursive: true);
+    if (file.existsSync())
+      throw 'The file exists';
+    file.createSync(recursive: true);
     file.writeAsBytesSync(toData());
   }
 
