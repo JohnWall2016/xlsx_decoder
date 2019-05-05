@@ -203,6 +203,11 @@ class Sheet extends AttachedXmlElement {
         index, copyRow.toXml(rowIndex: index, clearValue: clearValue));
   }
 
+  Row copyRowTo(int copyIndex, int toIndex, {bool clearValue = false}) {
+    if (copyIndex == toIndex) return rowAt(copyIndex);
+    else return insertRowCopyFrom(toIndex, copyIndex, clearValue: clearValue);
+  }
+
   toXmls() {
     var node = thisNode.copy();
 
