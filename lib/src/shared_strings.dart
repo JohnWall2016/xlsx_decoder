@@ -51,9 +51,14 @@ class SharedStrings extends AttachedXmlElement {
       var content = node.children[0];
       if (content is XmlElement) {
         if (content.name.local == 't') {
-          var string = content.children[0].text;
-          _nodeArray.add(string);
-          _indexMap[string] = i++;
+          if (content.children.isNotEmpty) {
+            var string = content.children[0].text;
+            _nodeArray.add(string);
+            _indexMap[string] = i++;
+          } else {
+            _nodeArray.add('');
+            _indexMap[''] = i++;
+          }
         } else {
           // TODO(wj): A dirty hack
           var string = '';
