@@ -132,7 +132,7 @@ class Cell {
             _remainingFormulaAttributes.add(attr);
         }
       });
-      _formula = fNode.children[0].text;
+      _formula = fNode.children.isNotEmpty ? fNode.children[0].text : null;
     }
 
     // If any unknown children are still present, store them for later output.
