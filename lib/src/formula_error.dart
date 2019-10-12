@@ -16,9 +16,9 @@ class FormulaError {
   static final VALUE = FormulaError("#VALUE!");
 
   static FormulaError getError(String error) {
-    [DIV0, NA, NAME, NULL, NUM, REF, VALUE].forEach((e) {
+    for (var e in [DIV0, NA, NAME, NULL, NUM, REF, VALUE]) {
       if (e.error == error) return e;
-    });
+    }
     return FormulaError(error);
   }
 }

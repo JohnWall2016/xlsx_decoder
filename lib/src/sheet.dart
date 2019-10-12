@@ -176,7 +176,7 @@ class Sheet extends AttachedXmlElement {
     }
   }
 
-  Row insertRow(int index, [XmlElement rowNode]) {
+  Row insertRow(int index, [XmlElement rowNode, int copyIndex]) {
     rowNode ??= Element('row', {'r': index}).toXmlNode();
     var row = Row(this, rowNode);
     _rows.nodesFrom(index, (node) {
@@ -186,26 +186,40 @@ class Sheet extends AttachedXmlElement {
     });
     _rows[index] = row;
 
+    var addMergeCells = <RangeRef, XmlElement>{};
     _mergeCells.forEach((ref, node) {
       if (index <= ref.start.row || index <= ref.end.row) {
         if (index <= ref.start.row) ref.start.row++;
         if (index <= ref.end.row) ref.end.row++;
         setAttribute(node, 'ref', ref.toAddress());
       }
+      if (copyIndex != null) {
+        if (ref.start.row == copyIndex && ref.end.row == copyIndex) {
+          var rangeRef =
+              RangeRef(index, ref.start.column, index, ref.end.column);
+          addMergeCells[rangeRef] =
+              Element('mergeCell', {'ref': rangeRef.toAddress()}).toXmlNode();
+        }
+      }
     });
+    if (addMergeCells.isNotEmpty) {
+      _mergeCells.addAll(addMergeCells);
+    }
     return row;
   }
 
   Row insertRowCopyFrom(int index, int copyIndex, {bool clearValue = false}) {
     var copyRow = _rows[copyIndex];
     if (copyRow == null) return insertRow(index);
-    return insertRow(
-        index, copyRow.toXml(rowIndex: index, clearValue: clearValue));
+    return insertRow(index,
+        copyRow.toXml(rowIndex: index, clearValue: clearValue), copyIndex);
   }
 
   Row copyRowTo(int copyIndex, int toIndex, {bool clearValue = false}) {
-    if (copyIndex == toIndex) return rowAt(copyIndex);
-    else return insertRowCopyFrom(toIndex, copyIndex, clearValue: clearValue);
+    if (copyIndex == toIndex)
+      return rowAt(copyIndex);
+    else
+      return insertRowCopyFrom(toIndex, copyIndex, clearValue: clearValue);
   }
 
   toXmls() {
